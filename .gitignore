@@ -1,0 +1,5 @@
+/*.ini
+engine/instance/__pycache__/
+/tecbusca/
+engine/instance/config.ini
+engine/docker-compose.yaml

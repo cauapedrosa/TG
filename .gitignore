@@ -1,5 +1,16 @@
-/*.ini
-engine/instance/__pycache__/
+# Ignore all backup classifier.pickle (s)
+**/my_classifier.?.pickle
+
+# Ignore .ini and .yaml files
+**.ini
+**.yaml
+
+# Ignore __pycache__ directories
+**/__pycache__
+**/__pycache__/*
+*.pyc
+
+# Ignore other directories
+*/diagram
 /tecbusca/
-engine/instance/config.ini
-engine/docker-compose.yaml
+*/chromedriver

@@ -11,6 +11,6 @@
 *.pyc
 
 # Ignore other directories
-*/diagram
+/diagram/
 /tecbusca/
 */chromedriver

@@ -1,0 +1,36 @@
+version: "3"
+
+volumes:
+  psql:
+    name: psql
+
+services:
+
+  psql:
+    image: postgres:12-alpine
+    container_name: psql
+    hostname: psql
+    restart: always
+    ports:
+      - '127.0.0.1:5432:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1973
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks: 
+      - compose_net
+  
+  pgadmin:
+    image: dpage/pgadmin4
+    environment: 
+      PGADMIN_DEFAULT_EMAIL=yurirafael@outlook.com
+      PGADMIN_DEFAULT_PASSWORD=1973
+    ports: 
+      - '127.0.0.1:16543:80'
+    networks: 
+      - compose_net
+
+networks:
+  compose_net:
+    driver: bridge

@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 
-def config(filename='fatec_tg\instance\config.ini', section='postgresql'):
+def config(filename='engine\instance\config.ini', section='postgresql'):
     parser = ConfigParser()
     parser.read(filename)
 

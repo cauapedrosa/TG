@@ -1,4 +1,5 @@
 import instance.driver
+from Job import Job
 import psycopg2
 from instance.config import config
 from selenium import webdriver
@@ -16,6 +17,7 @@ import csv
 from configparser import ConfigParser
 import argparse
 import traceback
+
 
 
 def listToString(s):
@@ -76,26 +78,33 @@ def main():
     else:
         print('choose a valid browser! chrome or chromium')
 
-    #specify chrome locations
-    ser = Service(instance.driver.driver_location)
 
-    #add options
-    opt = webdriver.ChromeOptions()
-    opt.binary_location = instance.driver.binary_location
-
-    driver = webdriver.Chrome(service=ser, options=opt)
 
     #today
-    today = date.today()
 
-    #Open webdriver at site vagas.com
+
+
+    row_list = [["Titulo", "link", "Descricao"]]
+
+    for url in urls:
+        getJobsFrom_VagasG(url, 0)
+
+    with open('./db/reports/vagas_general_data.csv', 'a', newline='') as file:
+        writer = csv.writer(file, delimiter=';')
+        writer.writerows(row_list)
+
+    #close chrome
+    driver.quit()
+
+    #close file
+    file.close()
+
+def getJobsFrom_VagasG():
+    jobList = []
     urls = [
         "https://www.vagas.com.br/vagas-de-estagio?m%5B%5D=Empresa+e+Home+Office",
         "https://www.vagas.com.br/vagas-de-estagio?m%5B%5D=100%25+Home+Office"
     ]
-
-    row_list = [["Titulo", "link", "Descricao"]]
-
     for url in urls:
         driver.get(url)
 
@@ -108,7 +117,7 @@ def main():
                 sleep(2)
                 # button = driver.find_element_by_xpath('//*[@id="maisVagas"]')
                 buttons = driver.find_elements(By.XPATH,
-                                               '//*[@id="maisVagas"]')
+                                                '//*[@id="maisVagas"]')
                 print(f'DEBUG| buttons: {buttons}')
                 buttons[0].click()
                 print('Waiting for more jobs...')
@@ -136,39 +145,38 @@ def main():
             try:
                 counter += 1
                 print(f'''DEBUG| Extracting Vaga #{counter}''')
-                #extract job title
+                ## Extract job title
                 vaga_title = vagas.a["title"]
                 # print(f'Title: {vaga_title}')
 
-                #extract job link
+                ## Extract job link
                 vaga_link = "https://www.vagas.com.br" + vagas.a["href"]
 
-                #extract job description
+                ## Extract job description
                 driver.get(vaga_link)
                 sleep(2)
                 html_desc = driver.page_source
                 soup_vaga_desc = BeautifulSoup(html_desc, 'html.parser')
 
-                #extract company name
+                ## Extract company name
                 container_vaga_empresa = vagas.findAll("span",
-                                                       {"class": "emprVaga"})
+                                                        {"class": "emprVaga"})
                 vaga_empresa = container_vaga_empresa[0].text.strip()
 
-                #extract job publication date
+                ## Extract job publication date
                 container_data = vagas.findAll("span",
-                                               {"class": "data-publicacao"})
+                                                {"class": "data-publicacao"})
                 vaga_date = container_data[0].text
 
-                #extract job relevance
+                ## Extract job relevance
                 container_vaga_nivel = vagas.findAll("span",
-                                                     {"class": "nivelVaga"})
+                                                        {"class": "nivelVaga"})
                 vaga_nivel = container_vaga_nivel[0].text.strip()
 
                 # print("Unprocessed date: ", vaga_data)
-
-                vaga_date = getJobDate(today, vaga_date)
-
+                vaga_date = getJobDate(vaga_date)
                 # print("Processed date: ", vaga_data)
+
                 container_vaga_desc = soup_vaga_desc.find(
                     "div", "job-tab-content job-description__text texto")
                 vaga_desc_texto = container_vaga_desc.get_text()
@@ -191,30 +199,16 @@ def main():
                 print(f'## Nivel| {vaga_nivel}')
                 print(f'## Data | {vaga_date}')
                 print(f'## Descr|{join_vaga_desc[0:70]}[...]')
-
-                # Insert BD
-                insert_vaga_geral(vaga_link, vaga_title, vaga_nivel,
-                                  join_vaga_desc, vaga_date)
-                # Save CSV
-                actual_list = [
-                    vaga_link, vaga_title, vaga_nivel, join_vaga_desc,
-                    vaga_date
-                ]
-                row_list.append(actual_list)
-
+                print(f'## Empresa| {vaga_empresa}')
+                print('\n')
+                j = Job(vaga_link, 0, vaga_title, vaga_desc_texto, vaga_date)
+                jobList.append(j)
+                print(f'Appended J({j}) to jobList')
             except Exception as exception:
                 traceback.print_exc()
                 continue
 
-    with open('./db/reports/vagas_general_data.csv', 'a', newline='') as file:
-        writer = csv.writer(file, delimiter=';')
-        writer.writerows(row_list)
-
-    #close chrome
-    driver.quit()
-
-    #close file
-    file.close()
+    return jobList
 
 
 def getJobDate(text_date):

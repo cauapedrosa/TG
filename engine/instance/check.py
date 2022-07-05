@@ -4,6 +4,8 @@ from config import config
 
 def check():
     commands = ("""
+        SELECT count(*) FROM curso
+        """, """
         SELECT count(c.curso_id), c.curso_id, c.curso_titulo FROM vaga_formatada v JOIN curso c ON v.curso_id = c.curso_id GROUP BY c.curso_id ORDER BY count(c.curso_id) DESC
         """, """
         SELECT count(c.curso_id), c.curso_id, c.curso_titulo FROM vaga_geral v JOIN curso c ON v.curso_id = c.curso_id GROUP BY c.curso_id ORDER BY count(c.curso_id) DESC
@@ -14,15 +16,16 @@ def check():
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
-
+        count = 0
         for command in commands:
             cur.execute(command)
-            print(f'EXECUTING: {command}')
+            count += 1
+            print(f'Executing Command #{count}:\n{command.strip()}:')
+            print(f'\nResult Column Description:\n{cur.description}')
             aux = cur.fetchall()
-            print("(COUNT, CURSO_ID, CURSO_TITULO)")
             for row in aux:
                 print(row)
-
+            print("\n")
         cur.close()
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:

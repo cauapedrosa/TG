@@ -1,3 +1,11 @@
+# Internals
+from Job import Job
+import instance.driver
+from instance.config import config
+from vagas_general_data import getJobsFrom_VagasG
+from vagas_formated_data import getJobsFromCourseID_VagasF
+from linkedin_scraper import getUrlForCourse, getCourseList, getJobsFromUrl_Linkedin, getUrlForGeneralJobs, getUrlsForAllCourses
+# Externals
 import time
 import traceback
 from typing import final
@@ -5,18 +13,14 @@ from typing import final
 import psycopg2
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from Job import Job
-import instance.driver
-from instance.config import config
-from vagas_general_data import getJobsFrom_VagasG
-from linkedin_scraper import getUrlForCourse,getCourseList, getJobsFromUrl_Linkedin, getUrlForGeneralJobs, getUrlsForAllCourses
 
-## Specify chrome locations
+# Specify chrome locations
 ser = Service(instance.driver.driver_location)
-## Add options
+# Add options
 opt = webdriver.ChromeOptions()
 opt.binary_location = instance.driver.binary_location
 driver = webdriver.Chrome(service=ser, options=opt)
+
 
 def saveJobGeneral(job):
     conn = None
@@ -57,6 +61,7 @@ def saveJobFormatted(job):
             print(f'Closing connection to database')
             conn.close()
 
+
 def menu_main():
     print("\n#############################################")
     print("########  Starting scraper_main.py  #########")
@@ -79,6 +84,7 @@ def menu_main():
         return menu_vagas()
     return flag
 
+
 def menu_linkedin():
     print("# 1: Scrape Linkedin for All Courses")
     print("# 2: Scrape Linkedin for Specific Course ID")
@@ -89,6 +95,7 @@ def menu_linkedin():
     except Exception as err:
         print("Please type a Number")
     return flag
+
 
 def menu_vagas():
     print("# 4: Scrape Vagas for All Courses")
@@ -101,10 +108,11 @@ def menu_vagas():
         print("Please type a Number")
     return flag
 
+
 def main():
     flag = menu_main()
-    while (flag >0 ):
-        ## 1: Scrape Linkedin for All Courses
+    while (flag > 0):
+        # 1: Scrape Linkedin for All Courses
         if flag == 1:
             print("You selected: Scrape Linkedin for All Courses")
             try:
@@ -115,7 +123,8 @@ def main():
                         print("Course 1 is not a valid course")
                     else:
                         url = getUrlForCourse(course_id[0])
-                        jobs = getJobsFromUrl_Linkedin(driver, url, course_id[0])
+                        jobs = getJobsFromUrl_Linkedin(
+                            driver, url, course_id[0])
                         for job in jobs:
                             saveJobFormatted(job)
             except Exception as exception:
@@ -126,7 +135,7 @@ def main():
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
                 flag = 0
 
-        ## 2: Scrape Linkedin for Specific Course ID
+        # 2: Scrape Linkedin for Specific Course ID
         elif flag == 2:
             print("You selected: Scrape Linkedin for Specific Course ID")
             try:
@@ -138,9 +147,9 @@ def main():
                 jobs = getJobsFromUrl_Linkedin(driver, url, course_id)
                 print(f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
                 print(f'\nSaving jobs to database...')
-                counter=0
+                counter = 0
                 for job in jobs:
-                    counter+=1
+                    counter += 1
                     print(f'{counter}/{len(jobs)} = {job}')
                     saveJobFormatted(job)
             except Exception as exception:
@@ -150,8 +159,7 @@ def main():
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
 
-
-        ## 3: Scrape Linkedin for Unclassified Jobs
+        # 3: Scrape Linkedin for Unclassified Jobs
         elif flag == 3:
             print("You selected: Scrape Linkedin for Unclassified Jobs")
             try:
@@ -167,7 +175,7 @@ def main():
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
 
-        ## 4: Scrape Vagas for All Courses
+        # 4: Scrape Vagas for All Courses
         elif flag == 4:
             print("You selected: Scrape Vagas for All Courses")
             try:
@@ -177,7 +185,10 @@ def main():
                     if course_id[0] == 1:
                         print("Course 1 is not a valid course")
                     else:
-                        jobs = getJobsFromUrl_VagasF(driver, course_id[0]) #TODO
+                        jobs = getJobsFromCourseID_VagasF(driver, course_id[0])
+                        print(
+                            f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
+                        print(f'\nSaving jobs to database...')
                         for job in jobs:
                             saveJobFormatted(job)
             except Exception as exception:
@@ -187,8 +198,7 @@ def main():
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
 
-
-        ## 5: Scrape Vagas for Specific Course ID
+        # 5: Scrape Vagas for Specific Course ID
         elif flag == 5:
             print("You selected: Scrape Vagas for Specific Course ID")
             try:
@@ -196,23 +206,22 @@ def main():
                 print(f'Select the course you wish to Scrape from the list:')
                 printCourseList()
                 course_id = int(input())
-                url = getUrlForCourse(course_id)
-                jobs = getJobsFromUrl_VagasF(driver, url, course_id) #TODO
+                jobs = getJobsFromCourseID_VagasF(driver, course_id)
                 for job in jobs:
                     saveJobFormatted(job)
             except Exception as exception:
                 traceback.print_exc()
-                continue
+                break
             finally:
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
 
-        ## 6: Scrape Vagas for Unclassified Jobs
+        # 6: Scrape Vagas for Unclassified Jobs
         elif flag == 6:
             print("You selected: Scrape Vagas for Unclassified Jobs")
             try:
                 start = time.perf_counter()
-                jobs = getJobsFrom_VagasG()
+                jobs = getJobsFrom_VagasG(driver)
                 for job in jobs:
                     saveJobGeneral(job)
             except Exception as exception:
@@ -221,8 +230,6 @@ def main():
             finally:
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
-
-
 
 
 def printCourseList():

@@ -177,7 +177,7 @@ def main():
                     if course_id[0] == 1:
                         print("Course 1 is not a valid course")
                     else:
-                        jobs = getJobsFromUrl_VagasF(driver, course_id[0])
+                        jobs = getJobsFromUrl_VagasF(driver, course_id[0]) #TODO
                         for job in jobs:
                             saveJobFormatted(job)
             except Exception as exception:
@@ -197,7 +197,7 @@ def main():
                 printCourseList()
                 course_id = int(input())
                 url = getUrlForCourse(course_id)
-                jobs = getJobsFromUrl_VagasF(driver, url, course_id)
+                jobs = getJobsFromUrl_VagasF(driver, url, course_id) #TODO
                 for job in jobs:
                     saveJobFormatted(job)
             except Exception as exception:

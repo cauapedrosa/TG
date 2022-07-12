@@ -27,7 +27,7 @@ def getUrlForCourse(course_id):
     linkedin_base = "https://br.linkedin.com/jobs/search?keywords={term}&location=Brasil&geoId=106057199&trk=public_jobs_jobs-search-bar_search-submit&redirect=false&position=1&pageNum=0"
     course = getCourse(course_id)
     if course_id == 1:
-        print(f'Course ({course[0]},{course[1]}) is not a valid course')
+        print(f'Course ({course}) is not a valid course')
     else:
         str = urllib.parse.quote_plus("Estagio " + course[1])
         url = linkedin_base.format(term=str)
@@ -47,8 +47,8 @@ def getUrlsForAllCourses():
 def getJobsFromUrl_Linkedin(driver, url, course_id):
     if course_id == 1:
         return
+    print(f'# Subject: {course_id} - {getCourse(course_id)[1]}')  # Tracker
     print(f'\n--> Getting Jobs from\n[{url}]')
-    print(f'Subject: {course_id} - {getCourse(course_id)[1]}')
     driver.get(url)
     sleep(2)
 
@@ -71,7 +71,7 @@ def getJobsFromUrl_Linkedin(driver, url, course_id):
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
     linkedin_jobs = soup.find_all('a', {'class': 'base-card__full-link'})
-    print(f'Found {len(linkedin_jobs)} len(vaga_linkedins).')
+    print(f'Found {len(linkedin_jobs)} len(vaga_linkedins).')  # Tracker
     print("--------------------------------")
     print("Entering Extraction Loop: ")
     i = 0
@@ -79,17 +79,19 @@ def getJobsFromUrl_Linkedin(driver, url, course_id):
     for linkedin_job in linkedin_jobs:
         print("--------------------------------")
         i += 1
-        # print(f'Getting Job #{i}/{len(linkedin_jobs)} for Subect {course_id} - {getCourse(course_id)[1]}')
+        print(
+            f'Getting Job #{i}/{len(linkedin_jobs)} for Subect {course_id} - {getCourse(course_id)[1]}')    # Tracker
         link = trimUrlAtRefid(linkedin_job['href'])
         jobList.append(getJobDetails(driver, link, course_id))
     return jobList
 
 
 def getJobDetails(driver, job_url, course_id):
-    print(f'Getting Job Details: ')
+    # print(f'Getting Job Details: ')
     try:
         job_url = trimUrlAtRefid(job_url)
-        print(f'\n--> Getting Job Detail Page\n[{job_url}]')
+        print(
+            f'\n--> Getting Job Detail Page\n[{job_url}]')  # DEBUG
         driver.get(job_url)
         sleep(3)
 
@@ -134,13 +136,13 @@ def getJobDetails(driver, job_url, course_id):
         # print(f'## Descr: {text_desc_clean}')
         newJob = Job(job_url, int(course_id), job_title,
                      job_text_desc, job_poster, job_date, job_locale)
-        print(f'\nNew Job Instanced at getJobDetails: {newJob}')
-        print(f'URL: {newJob.url}')
-        print(f'Course_ID: {newJob.course_id}')
-        print(f'Title: {newJob.title}')
-        print(f'Date: {newJob.date}')
-        print(f'Poster: {newJob.poster}')
-        print(f'Locale: {newJob.locale}')
+        print(f'\nNew Job Instanced at getJobDetails: {newJob}')  # DEBUG
+        # print(f'URL: {newJob.url}')
+        # print(f'Course_ID: {newJob.course_id}')
+        # print(f'Title: {newJob.title}')
+        # print(f'Date: {newJob.date}')
+        # print(f'Poster: {newJob.poster}')
+        # print(f'Locale: {newJob.locale}')
 
         return newJob
         # row_list.append(actual_list)

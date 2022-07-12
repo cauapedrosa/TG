@@ -36,6 +36,5 @@ def check():
 
 
 if __name__ == '__main__':
-    print("\n\n##################")
-    print(" RUNNING CHECK.PY:")
+    print("\n\n################## RUNNING CHECK.PY:\n")
     check()

@@ -50,7 +50,7 @@ def trimUrlAtRefid(url):
 def cleanup(txt):
     txt = normalize('NFKD', txt).encode('ASCII', 'ignore').decode('ASCII')
     txt = txt.replace(',', ' ').replace(';', ' ').replace('|', ' ')
-    return txt
+    return txt.strip()
 
 
 def cleanupDescr_Linkedin(txt):
@@ -97,7 +97,7 @@ def getCourse(course_id):
 
 
 def getJobDate(text_date):
-    text_date.trim("Publicada")
+    text_date.strip("Publicada")
     today = date.today()
     # job_date = today.strftime("%Y/%m/%d")
     delta = timedelta(0)
@@ -126,5 +126,5 @@ def getJobDate(text_date):
     elif text_date == "Há 1 mês":
         delta = timedelta(days=30)
     job_date = (today - delta)
-    print(f'getVagaDate({text_date} [d:{delta}]: {job_date})')
+    # print(f'getVagaDate({text_date} [d:{delta}]: {job_date})')
     return job_date

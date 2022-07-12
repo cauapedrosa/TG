@@ -26,19 +26,20 @@ def getUrlFromCourseID_Vagas(course_id):
 
 def getJobsFromCourseID_VagasF(driver, course_id):
     url = getUrlFromCourseID_Vagas(course_id)
-    job_link_list = []
+    jobList = []
     driver.get(url)
+    sleep(5)
+
     # Find the load button and click
     while True:
         try:
             print('Loading page...')
-            sleep(4)
             scroll(driver)
+            sleep(1)
             # Find the load button and click
             buttons = driver.find_elements(By.XPATH, '//*[@id="maisVagas"]')
             buttons[0].location_once_scrolled_into_view
             buttons[0].click()
-            sleep(2)
         except Exception as exception:
             traceback.print_exc()
             print('No more jobs!')
@@ -60,42 +61,35 @@ def getJobsFromCourseID_VagasF(driver, course_id):
     vaga_odd = soup.findAll("li", {"class": "vaga odd"})
     vaga_even = soup.findAll("li", {"class": "vaga even"})
     vaga_total = vaga_even + vaga_odd
-    print("DEBUG|Found vagas: ", len(vaga_total))
 
     # loops over all vaga_total
     for vagas in vaga_total:
-        job_link_list.append("https://www.vagas.com.br" + vagas.a["href"])
-
-    return
+        link = trimUrlVagas("https://www.vagas.com.br" + vagas.a["href"])
+        jobList.append(getJobDetails(driver, link, course_id))
+    return jobList
 
 
 def getJobDetails(driver, job_url, course_id):
-    print(f'Getting Job Details: ')
+    print(f'\nGetting Job Details: ')
     try:
         job_url = trimUrlAtRefid(job_url)
-        print(f'\n--> Getting Job Detail Page\n[{job_url}]')
+        print(f'--> Getting Job Detail Page\n[{job_url}]')
         driver.get(job_url)
-        sleep(3)
+        sleep(5)
         # html parsing
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
 #
-        vaga_counter += 1
         # Extract job title
         vaga_title = soup.find(
             "h1", {"class": "job-shortdescription__title"}).get_text()
-
-        # Extract job description
-        vaga_description = soup.find(
-            "li", {"class": "job-breadcrumb__item--published"}).get_text()
-
         # Extract job publication date
         vaga_data = soup.find(
             "li", {"class": "job-breadcrumb__item--published"}).get_text()
         job_date = getJobDate(vaga_data)
         # Extract job Poster #TODO
         vaga_poster = soup.find(
-            "h3", {"class", "job-shortdescription__company"}).get_text()
+            "h2", {"class", "job-shortdescription__company"}).get_text()
         # Extract job Locale #TODO
         vaga_locale = soup.find(
             "span", {"class", "info-localizacao"}).get_text()

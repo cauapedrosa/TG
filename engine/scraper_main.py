@@ -9,7 +9,6 @@ from linkedin_scraper import getUrlForCourse, getCourseList, getJobsFromUrl_Link
 import time
 import traceback
 from typing import final
-# from unittest import skip
 import psycopg2
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -34,8 +33,10 @@ def saveJobGeneral(job):
         conn.commit()
         cur.close()
         print(f'Job {job.title} saved to vaga_geral!')
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+    except psycopg2.DatabaseError as error:
+        print(f'Error: {error}')
+    except Exception as error:
+        print(traceback.format_exception_only)
     finally:
         if conn is not None:
             conn.close()
@@ -44,7 +45,7 @@ def saveJobGeneral(job):
 def saveJobFormatted(job):
     conn = None
     try:
-        print(f'Inserting "{job.title}" into vaga_formatada')
+        print(f'-> Inserting "{job.title}" into vaga_formatada')
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
@@ -53,12 +54,14 @@ def saveJobFormatted(job):
             (job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
         conn.commit()
         cur.close()
-        print("Job saved to vaga_formatada with no exceptions!")
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+        # print("Job saved to vaga_formatada with no exceptions!")
+    except psycopg2.DatabaseError as error:
+        print(f'Error: {error}')
+    except Exception as error:
+        print(traceback.format_exception_only)
     finally:
         if conn is not None:
-            print(f'Closing connection to database')
+            # print(f'Closing connection to database')
             conn.close()
 
 
@@ -207,8 +210,10 @@ def main():
                 printCourseList()
                 course_id = int(input())
                 jobs = getJobsFromCourseID_VagasF(driver, course_id)
+                print(f'Found {len(jobs)} jobs ! Now saving...')
                 for job in jobs:
-                    saveJobFormatted(job)
+                    # saveJobFormatted(job)
+                    print(f'Would now save job {job}')
             except Exception as exception:
                 traceback.print_exc()
                 break

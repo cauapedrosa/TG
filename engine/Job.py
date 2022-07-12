@@ -15,4 +15,4 @@ class Job:
             self.locale = "Brasil"
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__}(CourseID={self.course_id}, Title={self.title}, Poster={self.poster}, Date={self.date}, Locale={self.locale})"
+        return f'{type(self).__name__}(\nCourseID={self.course_id}, \nTitle={self.title}, \nPoster={self.poster}, \nDate={self.date}, \nLocale={self.locale})'

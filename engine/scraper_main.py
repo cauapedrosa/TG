@@ -36,7 +36,7 @@ def saveJobGeneral(job):
     except psycopg2.DatabaseError as error:
         print(f'Error: {error}')
     except Exception as error:
-        print(traceback.format_exception_only)
+        traceback.print_exc()
     finally:
         if conn is not None:
             conn.close()
@@ -58,7 +58,7 @@ def saveJobFormatted(job):
     except psycopg2.DatabaseError as error:
         print(f'Error: {error}')
     except Exception as error:
-        print(traceback.format_exception_only)
+        traceback.print_exc()
     finally:
         if conn is not None:
             # print(f'Closing connection to database')
@@ -168,12 +168,13 @@ def main():
             try:
                 start = time.perf_counter()
                 url = getUrlForGeneralJobs()
-                jobs = getJobsFromUrl_Linkedin(driver, url, 0)
+                jobs = getJobsFromUrl_Linkedin(driver, url, 1)
                 for job in jobs:
+                    print(f'Saving job {job.title} to database...')
                     saveJobGeneral(job)
             except Exception as exception:
                 traceback.print_exc()
-                break
+                continue
             finally:
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')

@@ -17,14 +17,12 @@ linkedin_base = "https://br.linkedin.com/jobs/search?keywords={term}&location=Br
 
 
 def getUrlForGeneralJobs():
-    linkedin_base = "https://br.linkedin.com/jobs/search?keywords={term}&location=Brasil&trk=public_jobs_jobs-search-bar_search-submit&redirect=false&position=1&pageNum=0"
-    str = urllib.parse.quote_plus("Estagio")
+    str = urllib.parse.quote_plus("Estágio")
     url = linkedin_base.format(term=str)
     return url
 
 
 def getUrlForCourse(course_id):
-    linkedin_base = "https://br.linkedin.com/jobs/search?keywords={term}&location=Brasil&geoId=106057199&trk=public_jobs_jobs-search-bar_search-submit&redirect=false&position=1&pageNum=0"
     course = getCourse(course_id)
     if course_id == 1:
         print(f'Course ({course}) is not a valid course')
@@ -46,11 +44,12 @@ def getUrlsForAllCourses():
 
 def getJobsFromUrl_Linkedin(driver, url, course_id):
     if course_id == 1:
-        return
-    print(f'# Subject: {course_id} - {getCourse(course_id)[1]}')  # Tracker
+        print("# CourseID 1 - Searching for Unclassified Jobs")
+    else:
+        print(f'# Subject: {course_id} - {getCourse(course_id)[1]}')  # Tracker
     print(f'\n--> Getting Jobs from\n[{url}]')
     driver.get(url)
-    sleep(2)
+    sleep(3)
 
     # Find the load button and click
     i = 0

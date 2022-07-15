@@ -178,6 +178,7 @@ def main():
             finally:
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
+                flag = 0
 
         # 4: Scrape Vagas for All Courses
         elif flag == 4:
@@ -201,6 +202,7 @@ def main():
             finally:
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
+                flag = 0
 
         # 5: Scrape Vagas for Specific Course ID
         elif flag == 5:
@@ -221,6 +223,7 @@ def main():
             finally:
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
+                flag = 0
 
         # 6: Scrape Vagas for Unclassified Jobs
         elif flag == 6:
@@ -236,6 +239,7 @@ def main():
             finally:
                 end = time.perf_counter()
                 print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
+                flag = 0
 
 
 def printCourseList():

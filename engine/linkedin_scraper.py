@@ -1,5 +1,4 @@
 # Internals
-from vagas_general_data import getJobDate
 from Job import Job
 from scraper_aux import *
 # Externals

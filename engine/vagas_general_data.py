@@ -79,15 +79,13 @@ def getJobsFrom_VagasG(driver):
                                                {"class": "data-publicacao"})
                 vaga_date = container_data[0].text
 
-                # Extract job relevance
-                container_vaga_nivel = vagas.findAll("span",
-                                                     {"class": "nivelVaga"})
-                vaga_nivel = container_vaga_nivel[0].text.strip()
+                # Extract Job Date
 
-                # print("Unprocessed date: ", vaga_data)
-                vaga_date = getJobDate(vaga_date)
-                # print("Processed date: ", vaga_data)
+                # Extract Job Locale
+                job_locale = soup.find(
+                    "span", {"class", "info-localizacao"}).get_text()
 
+                # Extract Job Description
                 container_vaga_desc = soup_vaga_desc.find(
                     "div", "job-tab-content job-description__text texto")
                 vaga_desc_texto = container_vaga_desc.get_text()
@@ -101,18 +99,19 @@ def getJobsFrom_VagasG(driver):
             try:
                 vaga_title = cleanup(vaga_title)
                 vaga_desc_texto = cleanup(vaga_desc_texto)
-                vaga_nivel = cleanup(vaga_nivel)
                 vaga_empresa = cleanup(vaga_empresa)
                 vaga_desc_words = vaga_desc_texto.split(' ')
                 join_vaga_desc = listToString(vaga_desc_words)
+                vaga_date = getJobDate(vaga_date)
+                vaga_locale = cleanup(job_locale)
                 print(f'Vaga #{counter} de {len(vaga_total)}')
                 print(f'## Title| {vaga_title}')
-                print(f'## Nivel| {vaga_nivel}')
                 print(f'## Data | {vaga_date}')
                 print(f'## Descr|{join_vaga_desc[0:70]}[...]')
                 print(f'## Empresa| {vaga_empresa}')
                 print('\n')
-                j = Job(vaga_link, 0, vaga_title, vaga_desc_texto, vaga_date)
+                j = Job(vaga_link, 0, vaga_title, vaga_desc_texto,
+                        vaga_empresa, vaga_date, vaga_locale)
                 jobList.append(j)
                 print(f'Appended J({j}) to jobList')
             except Exception as exception:

@@ -1,3 +1,4 @@
+from vagas_formated_data import getJobDetails
 from scraper_aux import *
 import instance.driver
 from Job import Job
@@ -18,106 +19,49 @@ def getJobsFrom_VagasG(driver):
     ]
     for url in urls:
         driver.get(url)
+        sleep(3)
 
         # Find the load button and click
         while True:
             try:
-                driver.execute_script(
-                    "window.scrollTo(0, document.body.scrollHeight);")
                 print('Loading page...')
-                sleep(2)
+                # scroll(driver)
+                sleep(1)
                 # button = driver.find_element_by_xpath('//*[@id="maisVagas"]')
-                buttons = driver.find_elements(By.XPATH,
-                                               '//*[@id="maisVagas"]')
-                print(f'DEBUG| buttons: {buttons}')
+                buttons = driver.find_elements(
+                    By.XPATH, '//*[@id="maisVagas"]')
+                buttons[0].location_once_scrolled_into_view
                 buttons[0].click()
-                print('Waiting for more jobs...')
-                sleep(2)
             except Exception as exception:
                 traceback.print_exc()
+                print('No more jobs!')
                 break
 
+        print("Moving onto parsing...")
         # html parsing
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
+        try:
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+        except Exception:
+            traceback.print_exc()
+            return
+
+        for script in soup(["script", "style"]):
+            script.extract()  # rip it out
 
         # find all jobs
         vaga_odd = soup.findAll("li", {"class": "vaga odd"})
         vaga_even = soup.findAll("li", {"class": "vaga even"})
         vaga_total = vaga_even + vaga_odd
-        print("DEBUG|Found vagas: ", len(vaga_total))
-
-        for script in soup(["script", "style"]):
-            script.extract()  # rip it out
 
         # loops over all vaga_total
-        counter = 0
+        print(f'Found {len(vaga_total)} jobs!')
+        count = 0
         for vagas in vaga_total:
-            try:
-                counter += 1
-                print(f'''DEBUG| Extracting Vaga #{counter}''')
-                # Extract job title
-                vaga_title = vagas.a["title"]
-                # print(f'Title: {vaga_title}')
-
-                # Extract job link
-                vaga_link = "https://www.vagas.com.br" + vagas.a["href"]
-
-                # Extract job description
-                driver.get(vaga_link)
-                sleep(2)
-                html_desc = driver.page_source
-                soup_vaga_desc = BeautifulSoup(html_desc, 'html.parser')
-
-                # Extract company name
-                container_vaga_empresa = vagas.findAll("span",
-                                                       {"class": "emprVaga"})
-                vaga_empresa = container_vaga_empresa[0].text.strip()
-
-                # Extract job publication date
-                container_data = vagas.findAll("span",
-                                               {"class": "data-publicacao"})
-                vaga_date = container_data[0].text
-
-                # Extract Job Date
-
-                # Extract Job Locale
-                job_locale = soup.find(
-                    "span", {"class", "info-localizacao"}).get_text()
-
-                # Extract Job Description
-                container_vaga_desc = soup_vaga_desc.find(
-                    "div", "job-tab-content job-description__text texto")
-                vaga_desc_texto = container_vaga_desc.get_text()
-                vaga_desc_texto = vaga_desc_texto.replace(",", "-").replace(
-                    ";", "-").replace("Descrição", " ")
-
-            except Exception as exception:
-                traceback.print_exc()
-                continue
-
-            try:
-                vaga_title = cleanup(vaga_title)
-                vaga_desc_texto = cleanup(vaga_desc_texto)
-                vaga_empresa = cleanup(vaga_empresa)
-                vaga_desc_words = vaga_desc_texto.split(' ')
-                join_vaga_desc = listToString(vaga_desc_words)
-                vaga_date = getJobDate(vaga_date)
-                vaga_locale = cleanup(job_locale)
-                print(f'Vaga #{counter} de {len(vaga_total)}')
-                print(f'## Title| {vaga_title}')
-                print(f'## Data | {vaga_date}')
-                print(f'## Descr|{join_vaga_desc[0:70]}[...]')
-                print(f'## Empresa| {vaga_empresa}')
-                print('\n')
-                j = Job(vaga_link, 0, vaga_title, vaga_desc_texto,
-                        vaga_empresa, vaga_date, vaga_locale)
-                jobList.append(j)
-                print(f'Appended J({j}) to jobList')
-            except Exception as exception:
-                traceback.print_exc()
-                continue
-
+            count += 1
+            print(f'\n## Parsing job {count} of {len(vaga_total)}')
+            link = trimUrlVagas("https://www.vagas.com.br" + vagas.a["href"])
+            jobList.append(getJobDetails(driver, link, 1))
     return jobList
 
 

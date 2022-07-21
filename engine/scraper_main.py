@@ -56,7 +56,7 @@ def saveJobFormatted(job):
             (job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
         conn.commit()
         cur.close()
-        # print("Job saved to vaga_formatada with no exceptions!")
+        print(f'Job {job.title} saved to vaga_formatada!')
     except psycopg2.DatabaseError as error:
         print(f'Error: {error}')
     except Exception as error:

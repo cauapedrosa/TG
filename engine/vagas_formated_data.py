@@ -34,7 +34,7 @@ def getJobsFromCourseID_VagasF(driver, course_id):
     while True:
         try:
             print('Loading page...')
-            scroll(driver)
+            # scroll(driver)
             sleep(1)
             # Find the load button and click
             buttons = driver.find_elements(By.XPATH, '//*[@id="maisVagas"]')
@@ -50,7 +50,7 @@ def getJobsFromCourseID_VagasF(driver, course_id):
     try:
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
-    except Exception as exception:
+    except Exception:
         traceback.print_exc()
         return
 
@@ -110,15 +110,7 @@ def getJobDetails(driver, job_url, course_id):
         job_poster = cleanup(vaga_poster)
         job_locale = cleanup(vaga_locale)
         newJob = Job(job_url, int(course_id), job_title,
-                     job_text_desc, job_poster, job_date, job_locale)
-        print(f'\nNew Job Instanced at getJobDetails: {newJob}')
-        print(f'URL: {newJob.url}')
-        print(f'Course_ID: {newJob.course_id}')
-        print(f'Title: {newJob.title}')
-        print(f'Date: {newJob.date}')
-        print(f'Poster: {newJob.poster}')
-        print(f'Locale: {newJob.locale}')
-#
+                     job_text_desc, job_poster, job_date, job_locale)#
         return newJob
     except IndexError as err:
         print(traceback.format_exception_only)

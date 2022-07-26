@@ -9,7 +9,12 @@ from time import sleep
 import urllib.parse
 import traceback
 
+# Amount of jobs to fetch before getting details. Set to 0 to allow as many as possible.
+max_jobs = 50  # 0 = unlimited
+# Base link for Infojobs Internship search
 link_base = "https://www.infojobs.com.br/empregos.aspx?tipocontrato=4&palabra={term}"
+
+# Gets job links from a search term
 
 
 def getUrl_Infojobs(term):
@@ -20,23 +25,28 @@ def getUrl_Infojobs(term):
     url = link_base.format(term=str)
     return url
 
+# Gets job details from a job link with a course id
+
 
 def getJobDetails(driver, job_url, course_id):
-    print(f'--> driver.get({job_url})')
+    print(f'--> driver.get({job_url})')  # Print job url
     try:
         driver.get(job_url)
-        sleep(3)
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-
+        sleep(1)
+        html = driver.page_source  # Get html
+        soup = BeautifulSoup(html, 'html.parser')  # Parse html
+        job_Header = soup.select_one('div#VacancyHeader')  # Find job header
     # Extract job title
-        job_title = soup.find(
+        job_title = job_Header.find(
             'h2', {'class', 'font-weight-bolder'}).get_text()
     # Extract job description
         job_text_desc = soup.find(
             'p', {'class', 'mb-16 text-break white-space-pre-line'}).get_text().strip()
-    # Extract job company
-        job_poster = soup.select_one('a[title]').get_text()
+    # Extract job poster
+        if job_Header.select_one('div.h4 > a[href]') != None:
+            job_poster = job_Header.select_one('div.h4 > a[href]').get_text()
+        else:
+            job_poster = "Empresa Confidencial"
     # Extract job date
         job_date = soup.find('div', {'class', 'caption'}).get_text().strip()
     # Extract job location
@@ -45,7 +55,7 @@ def getJobDetails(driver, job_url, course_id):
 
     # Polishing Job Details
         job_title = cleanup(job_title)
-        job_text_desc = cleanup(job_text_desc)
+        job_text_desc = cleanup(job_text_desc).replace(': ', ' ')
         job_poster = cleanup(job_poster)
         job_date = cleanup(job_date)
         job_locale = job_locale.split(',', 1)[0]
@@ -53,23 +63,25 @@ def getJobDetails(driver, job_url, course_id):
 
         newJob = Job(job_url, int(course_id), job_title,
                      job_text_desc, job_poster, job_date, job_locale)
-        print(f'\nNew Job Instanced at getJobDetails: {newJob}')
+        # print(f'\nNew Job Instanced at getJobDetails: {newJob}')
         return newJob
     except Exception as exception:
         traceback.print_exc()
     return
 
+# Gets job details for each job from a job url list with a course id
+
 
 def getJobsFromUrlList_Infojobs(driver, jobUrlList, course_id):
-    counter = 1
     jobList = []
-    for jobUrl in jobUrlList:
-        print(
-            f'\nGetting Jobs from UrlList in Course #{course_id}: {counter}/{len(jobUrlList)}')
-        job = getJobDetails(driver, jobUrl, course_id)
-        jobList.append(job)
-        counter += 1
+    for count, jobUrl in enumerate(jobUrlList):  # Iterate through jobUrlList
+        print(f'\nJob {count}/{len(jobUrlList)} for course #{course_id}:')
+        job = getJobDetails(driver, jobUrl, course_id)  # Get job details
+        print(job)  # Print job details
+        jobList.append(job)  # Add job to jobList
     return jobList
+
+#  Gets a list of jobs from a course id
 
 
 def getJobsFromCourseID_InfoJobs(driver, course_id):
@@ -83,44 +95,69 @@ def getJobsFromCourseID_InfoJobs(driver, course_id):
     jobUrlList = []
     # Populate URL List
     while True:
-        print(f'--> driver.get({url})')
-        driver.get(url)
-        sleep(3)
         try:
+            print(f'\n--> driver.get({url})')
+            driver.get(url)
+            sleep(1)
             html = driver.page_source
             soup = BeautifulSoup(html, 'html.parser')
-        except Exception as exception:
+        except Exception:
             traceback.print_exc()
             break
 
+        # Notice Agreement
+        try:
+            # if notice agreement button exists
+            if soup.select("button#didomi-notice-agree-button"):
+                print("\n--> Agreeing to didomi notice")
+                # click it
+                driver.find_element_by_id("didomi-notice-agree-button").click()
+                sleep(1)
+        except Exception:
+            traceback.print_exc()
+            print("Exception thrown in Notice Agree")
+            continue
+
         # Find all job links in current page
         try:
-            job_cards = soup.find_all('div', {'class', 'card'})
-            for job_card in job_cards:
-                job_href = job_card.find("div").find(
-                    "a", {"class", "text-decoration-none"}).attrs['href']
-                job_url = urllib.parse.urljoin(
-                    "https://www.infojobs.com.br/", job_href)
-                print(f'Appending Job URL: {job_url}')
-                jobUrlList.append(job_url)
+            # job_cards = soup.find_all('div', {'class', 'card'})
+            job_cards = soup.select('div.js_cardLink')  # Find all job cards
+            print(f'\n--> Found {len(job_cards)} jobs')
+            for job_card in job_cards:  # For each job card
+                # If job card has a link
+                if job_card.select_one('a.text-decoration-none').attrs['href']:
+                    # TODO: Check if this is the correct way to get the href
+                    job_href = job_card.select_one(
+                        'a.text-decoration-none').attrs['href']  # Get href
+                    job_url = urllib.parse.urljoin(
+                        "https://www.infojobs.com.br/", job_href)  # Get full url
+                    jobUrlList.append(job_url)  # Add to URL List
+            print(f'Total job urls found: {len(jobUrlList)}')
         except Exception:
             traceback.print_exc()
             continue
 
         # Find next page
         try:
+            if len(jobUrlList) >= max_jobs and max_jobs != 0:
+                print(f'\n--> Reached {max_jobs} jobs. Stopping.')
+                break
             print(f'Finding next page...')
-            next_url = soup.select_one('li > a[title="Próxima"]').attrs['href']
-            if url == next_url | next_url == None:
+            next_button = soup.select_one(
+                'li > a[title="Próxima"]')  # Find "next page" button
+            if next_button.attrs['href']:  # If button has href
+                next_url = next_button.attrs['href']  # Get href
+                url = next_url  # Set url to next page
+                # Print last 7 characters of url
+                print(f'Found next URL: ...{url[-7:]}')
+            else:
                 print(f'No more pages to scrape')
                 break
-            url = next_url
-            print(f'Found next URL: {url}')
         except Exception:
             traceback.print_exc()
             break
 
-    print(f'\nFound {len(jobUrlList)} Jobs')
+    print(f'\nFound {len(jobUrlList)} Jobs')  # Print total jobs found
     # Get Jobs from URL List
     jobList = getJobsFromUrlList_Infojobs(driver, jobUrlList, course_id)
     print(f'Returning jobList with len:{len(jobList)}')

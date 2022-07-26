@@ -22,23 +22,45 @@ opt.binary_location = instance.driver.binary_location
 driver = webdriver.Chrome(service=ser, options=opt)
 
 
-def saveJobGeneral(job):
+def saveJob(table, job):
     conn = None
     try:
-        print(f'-> Inserting "{job.title}" into vaga_geral')
+        print(f'> Inserting into {table}')
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
-        cur.execute(
-            """INSERT INTO vaga_geral(URL, curso_id, titulo, descr, empresa, postDate, locale) VALUES(%s, %s, %s, %s, %s, %s, %s)""",
-            (job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
+        cur.execute("""INSERT INTO %s (URL, curso_id, titulo, descr, empresa, postDate, locale) VALUES(%s, %s, %s, %s, %s, %s, %s)""",
+                    (table, job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
         conn.commit()
         cur.close()
-        print(f'Job {job.title} saved to vaga_geral!')
+        print(f'Sucess! Saved into {table}: {job.title}')
     except psycopg2.DatabaseError as error:
-        print(f'Error: {error}')
+        print(f'!! Error: {error}')
+    except Exception as error:
+        print(f'!! Error: {error}')
+        traceback.print_exc()
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+def saveJobGeneral(job):
+    conn = None
+    try:
+        print(f'> Inserting into vaga_geral')
+        params = config()
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+        cur.execute("""INSERT INTO vaga_geral(URL, curso_id, titulo, descr, empresa, postDate, locale) VALUES(%s, %s, %s, %s, %s, %s, %s)""",
+                    (job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
+        conn.commit()
+        cur.close()
+        print(f'Sucess! {job.title}')
+    except psycopg2.DatabaseError as error:
+        print(f'!! Error: {error}')
     except Exception as error:
         traceback.print_exc()
+        print(f'!! Error: {error}')
     finally:
         if conn is not None:
             conn.close()
@@ -47,20 +69,20 @@ def saveJobGeneral(job):
 def saveJobFormatted(job):
     conn = None
     try:
-        print(f'-> Inserting "{job.title}" into vaga_formatada')
+        print(f'> Inserting into vaga_formatada')
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
-        cur.execute(
-            """INSERT INTO vaga_formatada(URL, curso_id, titulo, descr, empresa, postDate, locale) VALUES(%s, %s, %s, %s, %s, %s, %s);""",
-            (job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
+        cur.execute("""INSERT INTO vaga_formatada(URL, curso_id, titulo, descr, empresa, postDate, locale) VALUES(%s, %s, %s, %s, %s, %s, %s);""",
+                    (job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
         conn.commit()
         cur.close()
-        print(f'Job {job.title} saved to vaga_formatada!')
+        print(f'Sucess! {job.title}')
     except psycopg2.DatabaseError as error:
-        print(f'Error: {error}')
+        print(f'!! Error: {error}')
     except Exception as error:
         traceback.print_exc()
+        print(f'!! Error: {error}')
     finally:
         if conn is not None:
             # print(f'Closing connection to database')
@@ -108,7 +130,8 @@ def main():
                         url = getUrlForCourse(course_id[0])
                         jobs = getJobsFromUrl_Linkedin(
                             driver, url, course_id[0])
-                        for job in jobs:
+                        for counter, job in enumerate(jobs):
+                            print(f'{counter}/{len(jobs)} = {job}')
                             saveJobFormatted(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -130,9 +153,7 @@ def main():
                 jobs = getJobsFromUrl_Linkedin(driver, url, course_id)
                 print(f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
                 print(f'\nSaving jobs to database...')
-                counter = 0
-                for job in jobs:
-                    counter += 1
+                for counter, job in enumerate(jobs):
                     print(f'{counter}/{len(jobs)} = {job}')
                     saveJobFormatted(job)
             except Exception as exception:
@@ -150,8 +171,8 @@ def main():
                 start = time.perf_counter()
                 url = getUrlForGeneralJobs()
                 jobs = getJobsFromUrl_Linkedin(driver, url, 1)
-                for job in jobs:
-                    print(f'Saving job {job.title} to database...')
+                for counter, job in enumerate(jobs):
+                    print(f'{counter}/{len(jobs)} = {job}')
                     saveJobGeneral(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -175,7 +196,8 @@ def main():
                         print(
                             f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
                         print(f'\nSaving jobs to database...')
-                        for job in jobs:
+                        for counter, job in enumerate(jobs):
+                            print(f'{counter}/{len(jobs)} = {job}')
                             saveJobFormatted(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -195,9 +217,9 @@ def main():
                 course_id = int(input())
                 jobs = getJobsFromCourseID_VagasF(driver, course_id)
                 print(f'Found {len(jobs)} jobs ! Now saving...')
-                for job in jobs:
-                    # saveJobFormatted(job)
-                    print(f'Would now save job {job}')
+                for counter, job in enumerate(jobs):
+                    print(f'{counter}/{len(jobs)} = {job}')
+                    saveJobFormatted(job)
             except Exception as exception:
                 traceback.print_exc()
                 break
@@ -212,7 +234,8 @@ def main():
             try:
                 start = time.perf_counter()
                 jobs = getJobsFrom_VagasG(driver)
-                for job in jobs:
+                for counter, job in enumerate(jobs):
+                    print(f'{counter}/{len(jobs)} = {job}')
                     saveJobGeneral(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -237,7 +260,8 @@ def main():
                         print(
                             f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
                         print(f'\nSaving jobs to database...')
-                        for job in jobs:
+                        for counter, job in enumerate(jobs):
+                            print(f'{counter}/{len(jobs)} = {job}')
                             saveJobFormatted(job)
             except Exception:
                 traceback.print_exc()
@@ -252,6 +276,7 @@ def main():
             print("You selected: InfoJobs for Specific Course ID")
             try:
                 start = time.perf_counter()
+                print('\n\nNot Implemented Yet\n')
             except Exception as exception:
                 exception.print_exc()
                 continue
@@ -268,7 +293,8 @@ def main():
                 jobs = getJobsFromCourseID_InfoJobs(driver, 1)
                 print(f'\nFound {len(jobs)} Unclassified Jobs!')
                 print(f'\nSaving jobs to database...')
-                for job in jobs:
+                for counter, job in enumerate(jobs):
+                    print(f'{counter}/{len(jobs)} = {job}')
                     saveJobGeneral(job)
             except Exception:
                 traceback.print_exc()

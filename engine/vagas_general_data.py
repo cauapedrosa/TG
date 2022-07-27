@@ -56,20 +56,16 @@ def getJobsFrom_VagasG(driver):
 
         # loops over all vaga_total
         print(f'Found {len(vaga_total)} jobs!')
-        count = 0
-        for vagas in vaga_total:
-            count += 1
+        for count, vagas in enumerate(vaga_total):
             print(f'\n## Parsing job {count} of {len(vaga_total)}')
             link = trimUrlVagas("https://www.vagas.com.br" + vagas.a["href"])
-            jobList.append(getJobDetails(driver, link, 1))
+            job = getJobDetails(driver, link, 1)
+            print(f'Appending: {job}')
+            jobList.append(job)
     return jobList
 
 
-def main():
+if __name__ == '__main__':
     print("\n\n##############################")
     print("# Please Run scraper_main.py #")
     print("##############################\n\n")
-
-
-if __name__ == '__main__':
-    main()

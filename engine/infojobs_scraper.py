@@ -1,4 +1,5 @@
 # Internals
+from datetime import date
 from Job import Job
 from scraper_aux import *
 # Externals
@@ -10,11 +11,44 @@ import urllib.parse
 import traceback
 
 # Amount of jobs to fetch before getting details. Set to 0 to allow as many as possible.
-max_jobs = 50  # 0 = unlimited
+max_jobs = 0  # 0 = unlimited
 # Base link for Infojobs Internship search
 link_base = "https://www.infojobs.com.br/empregos.aspx?tipocontrato=4&palabra={term}"
 
 # Gets job links from a search term
+
+
+def getJobDate(string):
+    job_date = date.today()
+    job_day = string.split(' ')[0]
+    job_month = string.split(' ')[1]
+    if int(job_day):
+        job_date = job_date.replace(day=int(job_day))
+    if job_month == 'jan':
+        job_date = job_date.replace(month=1)
+    elif job_month == 'fev':
+        job_date = job_date.replace(month=2)
+    elif job_month == 'mar':
+        job_date = job_date.replace(month=3)
+    elif job_month == 'abr':
+        job_date = job_date.replace(month=4)
+    elif job_month == 'mai':
+        job_date = job_date.replace(month=5)
+    elif job_month == 'jun':
+        job_date = job_date.replace(month=6)
+    elif job_month == 'jul':
+        job_date = job_date.replace(month=7)
+    elif job_month == 'ago':
+        job_date = job_date.replace(month=8)
+    elif job_month == 'set':
+        job_date = job_date.replace(month=9)
+    elif job_month == 'out':
+        job_date = job_date.replace(month=10)
+    elif job_month == 'nov':
+        job_date = job_date.replace(month=11)
+    elif job_month == 'dez':
+        job_date = job_date.replace(month=12)
+    return job_date
 
 
 def getUrl_Infojobs(term):
@@ -55,9 +89,10 @@ def getJobDetails(driver, job_url, course_id):
 
     # Polishing Job Details
         job_title = cleanup(job_title)
-        job_text_desc = cleanup(job_text_desc).replace(': ', ' ')
+        job_text_desc = job_text_desc = cleanup(
+            job_text_desc).replace(': ', ' ')
         job_poster = cleanup(job_poster)
-        job_date = cleanup(job_date)
+        job_date = getJobDate(job_date)
         job_locale = job_locale.split(',', 1)[0]
         job_locale = cleanup(job_locale)
 

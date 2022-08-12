@@ -11,8 +11,8 @@ def create_tables():
     DROP TABLE IF EXISTS vaga_geral;
     """, """
     CREATE TABLE curso(
-        curso_id SERIAL PRIMARY KEY,
-        curso_titulo VARCHAR(50) NOT NULL
+        curso_id int PRIMARY KEY,
+        curso_titulo varchar NOT NULL
     )
     """, """
     CREATE TABLE vaga_formatada (

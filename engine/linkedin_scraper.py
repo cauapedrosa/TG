@@ -72,13 +72,10 @@ def getJobsFromUrl_Linkedin(driver, url, course_id):
     print(f'Found {len(linkedin_jobs)} len(vaga_linkedins).')  # Tracker
     print("--------------------------------")
     print("Entering Extraction Loop: ")
-    i = 0
     jobList = []
-    for linkedin_job in linkedin_jobs:
+    for counter, linkedin_job in enumerate(linkedin_jobs):
         print("--------------------------------")
-        i += 1
-        print(
-            f'Getting Job #{i}/{len(linkedin_jobs)} for Subect {course_id} - {getCourse(course_id)[1]}')    # Tracker
+        # print(f'Getting Job #{counter}/{len(linkedin_jobs)} for Subect {course_id} - {getCourse(course_id)[1]}')    # Tracker
         link = trimUrlAtRefid(linkedin_job['href'])
         jobList.append(getJobDetails(driver, link, course_id))
     return jobList

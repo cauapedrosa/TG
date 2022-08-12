@@ -131,7 +131,7 @@ def main():
                         jobs = getJobsFromUrl_Linkedin(
                             driver, url, course_id[0])
                         for counter, job in enumerate(jobs):
-                            print(f'{counter}/{len(jobs)} = {job}')
+                            print(f'# {counter} / {len(jobs)}: {job}')
                             saveJobFormatted(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -154,7 +154,7 @@ def main():
                 print(f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
                 print(f'\nSaving jobs to database...')
                 for counter, job in enumerate(jobs):
-                    print(f'{counter}/{len(jobs)} = {job}')
+                    print(f'# {counter} / {len(jobs)}: {job}')
                     saveJobFormatted(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -172,7 +172,7 @@ def main():
                 url = getUrlForGeneralJobs()
                 jobs = getJobsFromUrl_Linkedin(driver, url, 1)
                 for counter, job in enumerate(jobs):
-                    print(f'{counter}/{len(jobs)} = {job}')
+                    print(f'# {counter} / {len(jobs)}: {job}')
                     saveJobGeneral(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -197,7 +197,7 @@ def main():
                             f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
                         print(f'\nSaving jobs to database...')
                         for counter, job in enumerate(jobs):
-                            print(f'{counter}/{len(jobs)} = {job}')
+                            print(f'# {counter} / {len(jobs)}: {job}')
                             saveJobFormatted(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -218,7 +218,7 @@ def main():
                 jobs = getJobsFromCourseID_VagasF(driver, course_id)
                 print(f'Found {len(jobs)} jobs ! Now saving...')
                 for counter, job in enumerate(jobs):
-                    print(f'{counter}/{len(jobs)} = {job}')
+                    print(f'# {counter} / {len(jobs)}: {job}')
                     saveJobFormatted(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -235,7 +235,7 @@ def main():
                 start = time.perf_counter()
                 jobs = getJobsFrom_VagasG(driver)
                 for counter, job in enumerate(jobs):
-                    print(f'{counter}/{len(jobs)} = {job}')
+                    print(f'# {counter} / {len(jobs)}: {job}')
                     saveJobGeneral(job)
             except Exception as exception:
                 traceback.print_exc()
@@ -261,7 +261,7 @@ def main():
                             f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
                         print(f'\nSaving jobs to database...')
                         for counter, job in enumerate(jobs):
-                            print(f'{counter}/{len(jobs)} = {job}')
+                            print(f'# {counter} / {len(jobs)}: {job}')
                             saveJobFormatted(job)
             except Exception:
                 traceback.print_exc()
@@ -294,7 +294,7 @@ def main():
                 print(f'\nFound {len(jobs)} Unclassified Jobs!')
                 print(f'\nSaving jobs to database...')
                 for counter, job in enumerate(jobs):
-                    print(f'{counter}/{len(jobs)} = {job}')
+                    print(f'# {counter} / {len(jobs)}: {job}')
                     saveJobGeneral(job)
             except Exception:
                 traceback.print_exc()

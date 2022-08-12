@@ -29,10 +29,8 @@ def listToString(s):
 
     # traverse in the string
     for ele in s:
-        ele = ele.replace('\n',
-                          ' ').replace('\xa0',
-                                       ' ').replace(',',
-                                                    ' | ').replace(';', ' | ')
+        ele = ele.replace('\n', ' ').replace(
+            '\xa0', ' ').replace(',', ' | ').replace(';', ' | ')
         str1 = str1 + ' ' + ele + ' '
 
     # return string

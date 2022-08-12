@@ -34,7 +34,7 @@ def getJobsFrom_VagasG(driver):
                 buttons[0].click()
             except Exception as exception:
                 traceback.print_exc()
-                print('No more jobs!')
+                print('This means No more jobs!\n')
                 break
 
         print("Moving onto parsing...")

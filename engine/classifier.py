@@ -104,13 +104,13 @@ def table_update(url, previsao):
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
         cur.execute(
-            """UPDATE vaga_geral SET curso_id = %s WHERE geral_url = %s""", (previsao, url))
+            """UPDATE vaga_geral SET curso_id = %s WHERE url = %s""", (previsao, url))
+        print(f'>{cur.rowcount} rows updated')
         conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print("Error: %s" % error)
-        cur.close()
-        return 2
+        print(f'ERROR: {error}')
+        # cur.close()
     finally:
         if conn is not None:
             conn.close()
@@ -119,20 +119,22 @@ def table_update(url, previsao):
 def main():
     # load data
     data_geral = postgresql_to_dataframe(
-        "SELECT geral_url, geral_desc FROM vaga_geral WHERE curso_id = 1;", (r'geral_url', r'geral_desc'))
-    print(f'{len(data_geral)} vagas carregadas')
+        "SELECT url, descr FROM vaga_geral WHERE curso_id = 1;", (r'url', r'descr'))
+
+    print(type(data_geral))
+    print(f'{data_geral} vagas carregadas')
 
     # Open pickle file
-    f = open('fatec_tg\my_classifier.pickle', 'rb')
+    f = open('engine\my_classifier.pickle', 'rb')
     classifier = pickle.load(f)
     f.close()
     print(f'Loaded classifier: {classifier}')
     for index, row in data_geral.iterrows():
-        text = row['geral_desc']
+        text = row['descr']
         previsao = classifier.predict([text])
         previsao = str(previsao).replace(
             "'", "").replace("[", "").replace("]", "")
-        table_update(row['geral_url'], de_para_previsao(previsao))
+        table_update(row['url'], de_para_previsao(previsao))
         print(f'#{index+1}/{len(data_geral)} | Predicting {previsao}')
 
 

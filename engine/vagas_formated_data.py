@@ -110,7 +110,8 @@ def getJobDetails(driver, job_url, course_id):
         job_poster = cleanup(vaga_poster)
         job_locale = cleanup(vaga_locale)
         newJob = Job(job_url, int(course_id), job_title,
-                     job_text_desc, job_poster, job_date, job_locale)#
+                     job_text_desc, job_poster, job_date, job_locale)
+        print(f'--> Job Details: {newJob}')
         return newJob
     except IndexError as err:
         print(traceback.format_exception_only)
@@ -121,11 +122,7 @@ def getJobDetails(driver, job_url, course_id):
     return
 
 
-def main():
+if __name__ == '__main__':
     print("\n\n##############################")
     print("# Please Run scraper_main.py #")
     print("##############################\n\n")
-
-
-if __name__ == '__main__':
-    main()

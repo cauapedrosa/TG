@@ -33,11 +33,11 @@ def saveJob(table, job):
                     (table, job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
         conn.commit()
         cur.close()
-        print(f'Sucess! Saved into {table}: {job.title}')
+        print(f'✅Success! Saved into {table}: {job.title}')
     except psycopg2.DatabaseError as error:
-        print(f'!! Error: {error}')
+        print(f'⚠️ Error: {error}')
     except Exception as error:
-        print(f'!! Error: {error}')
+        print(f'⚠️ Error: {error}')
         traceback.print_exc()
     finally:
         if conn is not None:
@@ -55,12 +55,12 @@ def saveJobGeneral(job):
                     (job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
         conn.commit()
         cur.close()
-        print(f'Sucess! {job.title}')
+        print(f'✅Success! {job.title}')
     except psycopg2.DatabaseError as error:
-        print(f'!! Error: {error}')
+        print(f'⚠️ Error: {error}')
     except Exception as error:
         traceback.print_exc()
-        print(f'!! Error: {error}')
+        print(f'⚠️ Error: {error}')
     finally:
         if conn is not None:
             conn.close()
@@ -77,12 +77,12 @@ def saveJobFormatted(job):
                     (job.url, job.course_id, job.title, job.desc, job.poster, job.date, job.locale))
         conn.commit()
         cur.close()
-        print(f'Sucess! {job.title}')
+        print(f'✅Success! {job.title}')
     except psycopg2.DatabaseError as error:
-        print(f'!! Error: {error}')
+        print(f'⚠️ Error: {error}')
     except Exception as error:
         traceback.print_exc()
-        print(f'!! Error: {error}')
+        print(f'⚠️ Error: {error}')
     finally:
         if conn is not None:
             # print(f'Closing connection to database')
@@ -249,20 +249,12 @@ def main():
         elif flag == 7:
             print("You selected: Scrape InfoJobs for All Courses")
             try:
-                start = time.perf_counter()
                 courseList = getCourseList()
                 for course_id in courseList:
                     if course_id[0] == 1:
                         print("Course 1 is not a valid course")
                     else:
-                        jobs = getJobsFromCourseID_InfoJobs(
-                            driver, course_id[0])
-                        print(
-                            f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
-                        print(f'\nSaving jobs to database...')
-                        for counter, job in enumerate(jobs):
-                            print(f'# {counter} / {len(jobs)}: {job}')
-                            saveJobFormatted(job)
+                        scrape_Infojobs(driver, course_id[0])
             except Exception:
                 traceback.print_exc()
                 continue
@@ -275,37 +267,38 @@ def main():
         elif flag == 8:
             print("You selected: InfoJobs for Specific Course ID")
             try:
-                start = time.perf_counter()
-                print('\n\nNot Implemented Yet\n')
-            except Exception as exception:
-                exception.print_exc()
-                continue
-            finally:
-                end = time.perf_counter()
-                print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
-                flag = menu_main()
-
-        # 9: Scrape InfoJobs for Unclassified Jobs
-        elif flag == 9:
-            print("You selected: Scrape InfoJobs for Unclassified Jobs")
-            try:
-                start = time.perf_counter()
-                jobs = getJobsFromCourseID_InfoJobs(driver, 1)
-                print(f'\nFound {len(jobs)} Unclassified Jobs!')
-                print(f'\nSaving jobs to database...')
-                for counter, job in enumerate(jobs):
-                    print(f'# {counter} / {len(jobs)}: {job}')
-                    saveJobGeneral(job)
+                print(f'Select the course you wish to Scrape from the list:')
+                printCourseList()
+                course_id = int(input())
+                scrape_Infojobs(driver, course_id)
             except Exception:
                 traceback.print_exc()
                 continue
-            finally:
-                end = time.perf_counter()
-                print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
-                flag = menu_main()
+
+        # 9: Scrape InfoJobs for Unclassified Jobs
+        elif flag == 9:
+            scrape_Infojobs(driver, 1)
+
+
+def scrape_Infojobs(driver, course_id):
+    try:
+        print(f'You selected: Scrape InfoJobs for Course {course_id}')
+        start = time.perf_counter()
+        jobs = getJobsFromCourseID_InfoJobs(driver, course_id)
+        print(f'\nFound {len(jobs)} Unclassified Jobs!')
+        print(f'\nSaving jobs to database...')
+        for counter, job in enumerate(jobs):
+            print(f'# {counter} / {len(jobs)}: {job}')
+            saveJobGeneral(job)
+    except Exception:
+        traceback.print_exc()
+    finally:
+        end = time.perf_counter()
+        print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
 
 
 def printCourseList():
+    print(f'ID - Course Name')
     for course in getCourseList():
         print(f'{course[0]} - {course[1]}')
 

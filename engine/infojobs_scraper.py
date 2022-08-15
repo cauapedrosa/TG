@@ -1,5 +1,4 @@
 # Internals
-from datetime import date
 from Job import Job
 from scraper_aux import *
 # Externals
@@ -9,9 +8,10 @@ from bs4 import BeautifulSoup
 from time import sleep
 import urllib.parse
 import traceback
+from datetime import date
 
 # Amount of jobs to fetch before getting details. Set to 0 to allow as many as possible.
-max_jobs = 0  # 0 = unlimited
+max_jobs = 100  # 0 = unlimited
 # Base link for Infojobs Internship search
 link_base = "https://www.infojobs.com.br/empregos.aspx?tipocontrato=4&palabra={term}"
 

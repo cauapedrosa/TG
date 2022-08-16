@@ -11,21 +11,21 @@ from unicodedata import normalize
 import traceback
 
 
-def getUrlFromCourseID_Vagas(course_id):
+def getUrlFromCourseID(course_id):
     url_base = "https://www.vagas.com.br/vagas-de-{term}/"
     course = getCourse(course_id)
+    # print(f'Getting URL from Course ID: {course_id} || Course: {course}') # Log
     if course_id == 1:
-        print(f'Course ({course[0]},{course[1]}) is not a valid course')
+        str = urllib.parse.quote_plus("Estagio")
+        url = url_base.format(term=str)
     else:
         str = urllib.parse.quote_plus("Estagio-" + course[1])
         url = url_base.format(term=str)
-        return url
-
-    return
+    return url
 
 
-def getJobsFromCourseID_VagasF(driver, course_id):
-    url = getUrlFromCourseID_Vagas(course_id)
+def getJobList(driver, course_id):
+    url = getUrlFromCourseID(course_id)
     jobList = []
     driver.get(url)
     sleep(5)
@@ -60,10 +60,11 @@ def getJobsFromCourseID_VagasF(driver, course_id):
     # find all jobs
     vaga_odd = soup.findAll("li", {"class": "vaga odd"})
     vaga_even = soup.findAll("li", {"class": "vaga even"})
-    vaga_total = vaga_even + vaga_odd
+    jobUrlList = vaga_even + vaga_odd
 
     # loops over all vaga_total
-    for vagas in vaga_total:
+    for count, vagas in enumerate(jobUrlList):
+        print(f'\nJob {count}/{len(jobUrlList)} for course #{course_id}:')
         link = trimUrlVagas("https://www.vagas.com.br" + vagas.a["href"])
         jobList.append(getJobDetails(driver, link, course_id))
     return jobList

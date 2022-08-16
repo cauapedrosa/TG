@@ -119,7 +119,7 @@ def getJobsFromUrlList_Infojobs(driver, jobUrlList, course_id):
 #  Gets a list of jobs from a course id
 
 
-def getJobsFromCourseID_InfoJobs(driver, course_id):
+def getJobsFromCourseID(driver, course_id):
     print(f'\nGetting Jobs from Course ID: {course_id}')
     if course_id == 1:
         url = getUrl_Infojobs(None)
@@ -175,7 +175,7 @@ def getJobsFromCourseID_InfoJobs(driver, course_id):
         # Find next page
         try:
             if len(jobUrlList) >= max_jobs and max_jobs != 0:
-                print(f'\n--> Reached {max_jobs} jobs. Stopping.')
+                print(f'\n-->  MAX_JOBS: {max_jobs} Reached. Stopping.')
                 break
             print(f'Finding next page...')
             next_button = soup.select_one(

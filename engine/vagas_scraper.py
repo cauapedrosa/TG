@@ -75,6 +75,7 @@ def getJobDetails(driver, job_url, course_id):
     try:
         job_url = trimUrlAtRefid(job_url)
         print(f'--> Getting Job Detail Page\n[{job_url}]')
+        sleep(1)
         driver.get(job_url)
         sleep(5)
         # html parsing
@@ -100,14 +101,11 @@ def getJobDetails(driver, job_url, course_id):
         vaga_desc_texto = container_vaga_desc.get_text()
         vaga_desc_texto = vaga_desc_texto.replace(
             ",", "-").replace(";", "-").replace("Descrição", " ")
-        vaga_desc_words = vaga_desc_texto.split(' ')
 
         job_url = trimUrlVagas(job_url)
         job_title = cleanup(vaga_title)
         vaga_desc_texto = cleanup(vaga_desc_texto)
-        vaga_desc_words = vaga_desc_texto.split(' ')
-        join_vaga_desc = listToString(vaga_desc_words)
-        job_text_desc = cleanup(join_vaga_desc)
+        job_text_desc = treat_text(cleanup(vaga_desc_texto))
         job_poster = cleanup(vaga_poster)
         job_locale = cleanup(vaga_locale)
         newJob = Job(job_url, int(course_id), job_title,

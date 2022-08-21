@@ -121,26 +121,15 @@ def getJobDetails(driver, job_url, course_id):
         job_title = cleanup(job_title)
         job_text_desc = cleanupDescr_Linkedin(
             cleanup(listToString(text_desc_raw.split())))
+        job_text_desc = treat_text(job_text_desc)
         # Get Job Posting Date
         job_date = getJobDate(text_post_time_ago)
-        # print(f'## course_id: {course_id}')
-        # print(f'## Title: {job_title}')
-        # print(f'## Date : {job_date}')
-        # print(f'## Poster: {job_poster}')
-        # print(f'## Locale: {job_locale}')
-        # print(f'## Descr: {text_desc_clean}')
+
         newJob = Job(job_url, int(course_id), job_title,
                      job_text_desc, job_poster, job_date, job_locale)
         print(f'\nNew Job Instanced at getJobDetails: {newJob}')  # DEBUG
-        # print(f'URL: {newJob.url}')
-        # print(f'Course_ID: {newJob.course_id}')
-        # print(f'Title: {newJob.title}')
-        # print(f'Date: {newJob.date}')
-        # print(f'Poster: {newJob.poster}')
-        # print(f'Locale: {newJob.locale}')
 
         return newJob
-        # row_list.append(actual_list)
     except IndexError as err:
         print(traceback.format_exception_only)
         print(err.__cause__.__str__)

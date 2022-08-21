@@ -21,7 +21,7 @@ def create_tables():
         titulo varchar NOT NULL,
         descr varchar NOT NULL,
         empresa varchar,
-		postDate varchar,
+		postDate Date,
 		locale varchar
     )
     """, """
@@ -31,7 +31,7 @@ def create_tables():
         titulo varchar NOT NULL,
         descr varchar NOT NULL,
         empresa varchar,
-		postDate varchar,
+		postDate Date,
 		locale varchar
     )
     """)

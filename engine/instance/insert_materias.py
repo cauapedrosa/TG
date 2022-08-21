@@ -1,3 +1,4 @@
+import time
 import psycopg2
 from config import config
 
@@ -13,7 +14,6 @@ def insert_cursos(cursos):
         for i, curso in enumerate(cursos):
             print(f"Inserting curso {i+1}/{len(cursos)}: {curso}")
             cur.execute(sql, (i+1, curso))
-        print(cur.query)
         conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -24,6 +24,7 @@ def insert_cursos(cursos):
 
 
 if __name__ == '__main__':
+    start = time.perf_counter()
     insert_cursos([
         ('Indefinido',),
         ('Agroindústria',),
@@ -112,3 +113,4 @@ if __name__ == '__main__':
         ('Têxtil e Moda',),
         ('Transporte Terrestre',)
     ])
+    print(f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

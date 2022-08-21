@@ -274,4 +274,6 @@ def printCourseList():
 
 
 if __name__ == "__main__":
+    start = time.perf_counter()
     main()
+    print(f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

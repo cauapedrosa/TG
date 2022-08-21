@@ -2,7 +2,13 @@ from datetime import date, timedelta
 from time import sleep
 from unicodedata import normalize
 import psycopg2
+from re import sub
+from nltk.tokenize import word_tokenize
 from instance.config import config
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+stopwords = nltk.corpus.stopwords.words('portuguese')
 
 
 def scroll(driver):
@@ -47,8 +53,20 @@ def trimUrlAtRefid(url):
 
 def cleanup(txt):
     txt = normalize('NFKD', txt).encode('ASCII', 'ignore').decode('ASCII')
-    txt = txt.replace(',', ' ').replace(';', ' ').replace('|', ' ')
+    txt = txt.replace(',', ' ').replace(';', ' ').replace(
+        '|', ' ').replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
     return txt.strip()
+
+def treat_text(text):
+    text = text.replace('(', ' ').replace(')', ' ').replace('/', ' ').replace('?', ' ').replace('-', ' ').replace('.', ' ').replace(':', ' ').replace('_', ' ').replace('+', ' ').replace(
+        '=', ' ').replace('#', ' ').replace('$', ' ').replace('%', ' ').replace('&', ' ').replace('*', ' ').replace('!', ' ').replace('>', ' ').replace('<', ' ').replace('[', ' ').replace(']', ' ')
+    text = sub("\d+", " ", text).lower()
+    words = word_tokenize(text)
+    wordsFiltered = []
+    for w in words:
+        if w not in stopwords:
+            wordsFiltered.append(w)
+    return " ".join(wordsFiltered)
 
 
 def cleanupDescr_Linkedin(txt):
@@ -124,5 +142,4 @@ def getJobDate(text_date):
     elif text_date == "Há 1 mês":
         delta = timedelta(days=30)
     job_date = (today - delta)
-    # print(f'getVagaDate({text_date} [d:{delta}]: {job_date})')
     return job_date

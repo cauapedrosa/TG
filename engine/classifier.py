@@ -1,7 +1,8 @@
+import time
+from instance.config import config
 from naive_bayes import postgresql_to_dataframe
 import pickle
 import psycopg2
-from instance.config import config
 
 
 def de_para_previsao(previsao):
@@ -139,4 +140,6 @@ def main():
 
 
 if __name__ == '__main__':
+    start = time.perf_counter()
     main()
+    print(f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

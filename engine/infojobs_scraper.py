@@ -20,8 +20,13 @@ link_base = "https://www.infojobs.com.br/empregos.aspx?tipocontrato=4&palabra={t
 
 def getJobDate(string):
     job_date = date.today()
-    job_day = string.split(' ')[0]
-    job_month = string.split(' ')[1]
+    # print(f'\ngetJobDate: {string.split()}')
+    if string == 'Ontem':
+        return job_date - timedelta(days=1)
+    elif string == 'Hoje':
+        return job_date
+    job_day = string.split()[0]
+    job_month = string.split()[1]
     if int(job_day):
         job_date = job_date.replace(day=int(job_day))
     if job_month == 'jan':
@@ -89,8 +94,7 @@ def getJobDetails(driver, job_url, course_id):
 
     # Polishing Job Details
         job_title = cleanup(job_title)
-        job_text_desc = job_text_desc = cleanup(
-            job_text_desc).replace(': ', ' ')
+        job_text_desc = treat_text(cleanup(job_text_desc))
         job_poster = cleanup(job_poster)
         job_date = getJobDate(job_date)
         job_locale = job_locale.split(',', 1)[0]
@@ -112,7 +116,7 @@ def getJobsFromUrlList_Infojobs(driver, jobUrlList, course_id):
     for count, jobUrl in enumerate(jobUrlList):  # Iterate through jobUrlList
         print(f'\nJob {count}/{len(jobUrlList)} for course #{course_id}:')
         job = getJobDetails(driver, jobUrl, course_id)  # Get job details
-        print(job)  # Print job details
+        print(f'Got job details: {job}')  # Print job details
         jobList.append(job)  # Add job to jobList
     return jobList
 
@@ -175,7 +179,7 @@ def getJobsFromCourseID(driver, course_id):
         # Find next page
         try:
             if len(jobUrlList) >= max_jobs and max_jobs != 0:
-                print(f'\n-->  MAX_JOBS: {max_jobs} Reached. Stopping.')
+                print(f'\n👍Found {max_jobs}(max_jobs) Jobs. Stopping.')
                 break
             print(f'Finding next page...')
             next_button = soup.select_one(

@@ -1,13 +1,14 @@
+import time
 import psycopg2
 from config import config
 
 
 def clear_duplicates():
-    command = """DELETE FROM vaga_geral
+    command = """DELETE FROM vaga_formatada
         WHERE ctid NOT IN (
-        SELECT min(ctid) FROM vaga_geral
-        GROUP  BY titulo, descr, empresa
-        ORDER BY empresa) RETURNING titulo, empresa;"""
+        SELECT min(ctid) FROM vaga_formatada
+        GROUP  BY titulo, descr
+        ORDER BY titulo) RETURNING titulo;"""
 
     conn = None
 
@@ -15,7 +16,7 @@ def clear_duplicates():
         params = config()
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
-        print(f'##################\n>Executing Command:\n{command.strip()}:')
+        print(f'##################\n>Executing Command:\n{command.strip()}\n')
         cur.execute(command)
         output = cur.fetchall()
         for row in output:
@@ -32,4 +33,6 @@ def clear_duplicates():
 
 
 if __name__ == '__main__':
+    start = time.perf_counter()
     clear_duplicates()
+    print(f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

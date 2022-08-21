@@ -20,7 +20,7 @@ def check():
             aux = cur.fetchall()
             for row in aux:
                 print(row)
-            print("\n")
+            print(f'Row Count: {cur.rowcount}\n')
         cur.close()
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:

@@ -58,8 +58,10 @@ def getJobDate(string):
 
 def getUrl_Infojobs(term):
     if term == None:
-        str = urllib.parse.quote_plus("Estágio")
+        # General search & Order by Newest First
+        str = urllib.parse.quote_plus("Estágio&campo=griddate&orden=desc")
     else:
+        # Search term is Course Name
         str = urllib.parse.quote_plus(term)
     url = link_base.format(term=str)
     return url

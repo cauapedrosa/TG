@@ -13,13 +13,14 @@ def check():
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
         for counter, command in enumerate(commands):
-            cur.execute(command)
             print(
                 f'##################\n>Executing Command #{counter+1}/{len(commands)}:\n{command.strip()}:')
+            cur.execute(command)
             print(f'\n>Result Column Description:\n{cur.description}')
-            aux = cur.fetchall()
-            for row in aux:
-                print(row)
+            print(f'Status: {cur.statusmessage}')
+            # aux = cur.fetchall()
+            # for row in aux:
+            #     print(row)
             print(f'Row Count: {cur.rowcount}\n')
         cur.close()
         conn.commit()

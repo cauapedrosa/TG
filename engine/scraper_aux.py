@@ -6,9 +6,18 @@ from re import sub
 from nltk.tokenize import word_tokenize
 from instance.config import config
 import nltk
+
+# Stopwords
 nltk.download('stopwords')
 nltk.download('punkt')
-stopwords = nltk.corpus.stopwords.words('portuguese')
+
+
+def getStopwords():
+    stopwords = nltk.corpus.stopwords.words('portuguese')
+    stopwords.extend(['etc', 'estagio', 'requisitos', 'responsabilidades', 'estagiario', 'estagiaria'])
+    stopwords.extend(nltk.corpus.stopwords.words('english'))
+    return stopwords
+#
 
 
 def scroll(driver):
@@ -57,11 +66,15 @@ def cleanup(txt):
         '|', ' ').replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
     return txt.strip()
 
+
 def treat_text(text):
-    text = text.replace('(', ' ').replace(')', ' ').replace('/', ' ').replace('?', ' ').replace('-', ' ').replace('.', ' ').replace(':', ' ').replace('_', ' ').replace('+', ' ').replace(
-        '=', ' ').replace('#', ' ').replace('$', ' ').replace('%', ' ').replace('&', ' ').replace('*', ' ').replace('!', ' ').replace('>', ' ').replace('<', ' ').replace('[', ' ').replace(']', ' ')
+    text = text.replace('(', ' ').replace(')', ' ').replace('/', ' ').replace("\\", ' ').replace('?', ' ').replace('-', ' ').replace('.', ' ').replace(':', ' ').replace('_', ' ').replace('+', ' ').replace(
+        '=', ' ').replace('#', ' ').replace('$', ' ').replace('%', ' ').replace('&', ' ').replace('*', ' ').replace('!', ' ').replace('>', ' ').replace('<', ' ').replace('[', ' ').replace(']', ' ').replace('`', ' ').replace(':', ' ')
+    text = text.replace("exibir menos", " ").replace("exibir", " ")
+    text = ' '.join( [w for w in text.split() if len(w)>1] )
     text = sub("\d+", " ", text).lower()
     words = word_tokenize(text)
+    stopwords = getStopwords()
     wordsFiltered = []
     for w in words:
         if w not in stopwords:

@@ -20,7 +20,8 @@ ser = Service(instance.driver.driver_location)
 opt = webdriver.ChromeOptions()
 opt.binary_location = instance.driver.binary_location
 driver = webdriver.Chrome(service=ser, options=opt)
-
+# Print Stopwords
+print(f'\nStopwords: {getStopwords()}\n')
 
 def saveJob(table, job):
     conn = None
@@ -82,17 +83,15 @@ def main():
             try:
                 courseList = getCourseList()
                 for course in courseList:
-                    course = course[0]
-                    if course == 1:
-                        print(f"Skipping Course {course} - {course[1]}")
+                    course_id = course[0]
+                    if course_id == 1:
+                        print(f"Skipping Course {course_id} - {course[1]}")
                     else:
-                        scrape_Linkedin(driver, course, 'vaga_formatada')
+                        scrape_Linkedin(driver, course_id, 'vaga_formatada')
             except Exception as exception:
                 traceback.print_exc()
                 continue
             finally:
-                end = time.perf_counter()
-                print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
                 flag = menu_main()
 
         # 2: Scrape Linkedin for Specific Course ID
@@ -177,6 +176,7 @@ def main():
         elif flag == 7:
             print("You selected: Scrape InfoJobs for All Courses")
             try:
+                start = time.perf_counter()
                 courseList = getCourseList()
                 for course in courseList:
                     course_id = course[0]

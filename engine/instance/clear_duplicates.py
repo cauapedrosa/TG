@@ -4,9 +4,9 @@ from config import config
 
 
 def clear_duplicates():
-    command = """DELETE FROM vaga_formatada
+    command = """DELETE FROM vaga_geral
         WHERE ctid NOT IN (
-        SELECT min(ctid) FROM vaga_formatada
+        SELECT min(ctid) FROM vaga_geral
         GROUP  BY titulo, descr
         ORDER BY titulo) RETURNING titulo;"""
 

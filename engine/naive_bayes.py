@@ -1,5 +1,5 @@
-import time
 from instance.config import config
+import psycopg2
 import pandas as pd
 from sklearn import datasets
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -8,13 +8,12 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split, cross_validate, cross_val_score
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report, confusion_matrix
-
 from re import sub
 import pickle
-import psycopg2
+import time
 import traceback
 
-
+random_state =6
 # save classifiers
 
 
@@ -63,9 +62,9 @@ def main():
 
     # Splitting the data into training and testing sets
     train, test, train_labels, test_labels = train_test_split(
-        descriptions, data['curso_id'], shuffle=True, random_state=12)
-    print(f'\n#Train:\n{train}')
-    print(f'\n#Test:\n{test}')
+        descriptions, data['curso_id'], shuffle=True, random_state=random_state)
+    print(f'\n#### Train:\n{train}')
+    print(f'\n### Test:\n{test}')
 
     # Defining base model
     print("\nDefining base model...")
@@ -84,9 +83,11 @@ def main():
     # print(f'Scores mean: {scores.mean()}')
     # # print(f'Scores var: {scores.var()}')
     print('###############################################################################')
-    print(f'🎯Classification Report:\n{classification_report(test_labels, preds, zero_division=1)}')
+    print(
+        f'🎯Classification Report:\n{classification_report(test_labels, preds, zero_division=0)}')
     print('###############################################################################')
-    print(f'🎯Accuracy Score: {accuracy_score(test_labels, preds)}')
+    print(
+        f'\n🎯Accuracy Score: {accuracy_score(test_labels, preds)}\n@ Random State #{random_state}')
     # Saving the model into a pickle file
     saveclassifier(model)
 
@@ -94,4 +95,5 @@ def main():
 if __name__ == '__main__':
     start = time.perf_counter()
     main()
-    print(f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')
+    print(
+        f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

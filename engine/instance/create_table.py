@@ -44,6 +44,8 @@ def create_tables():
 
         for command in commands:
             cur.execute(command)
+            print(f'\n#########################################\nExecuting: {command}')
+            print(f'Status: {cur.statusmessage}')
 
         cur.close()
         conn.commit()

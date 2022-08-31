@@ -13,7 +13,7 @@ import pickle
 import time
 import traceback
 
-random_state =6
+random_state = 14
 # save classifiers
 
 

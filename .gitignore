@@ -14,7 +14,3 @@
 /diagram/
 /tecbusca/
 */chromedriver
-
-# Misc
-clear_table_and_insert.py
-cleanup_descriptions_in_db.py

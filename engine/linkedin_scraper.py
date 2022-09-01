@@ -24,11 +24,13 @@ def getUrlForGeneralJobs():
 def getUrlForCourse(course_id):
     course = getCourse(course_id)
     if course_id == 1:
-        print(f'Course ({course}) is not a valid course')
-    else:
-        str = urllib.parse.quote_plus("Estagio " + course[1])
+        str = urllib.parse.quote_plus("Estágio")
         url = linkedin_base.format(term=str)
-        return url
+    else:
+        term = getSearchTerm(course[1])
+        str = urllib.parse.quote_plus(term)
+        url = linkedin_base.format(term=str)
+    return url
 
 
 def getUrlsForAllCourses():
@@ -41,7 +43,7 @@ def getUrlsForAllCourses():
     return urls
 
 
-def getJobsFromUrl_Linkedin(driver, url, course_id):
+def getJobsFromUrl(driver, url, course_id):
     if course_id == 1:
         print("# CourseID 1 - Searching for Unclassified Jobs")
     else:
@@ -52,14 +54,14 @@ def getJobsFromUrl_Linkedin(driver, url, course_id):
 
     # Find the load button and click
     i = 0
-    while (i < 3):
+    while (i < 5):
         try:
             button = driver.find_element(
                 '//*[@id="main-content"]/section[2]/button')
             button.click()
             sleep(2)
             i = i + 1
-            print('pinto')
+            print('pinto') # Yuri, why?
         except:
             driver.execute_script(
                 "window.scrollTo(0, document.body.scrollHeight);")
@@ -75,7 +77,7 @@ def getJobsFromUrl_Linkedin(driver, url, course_id):
     jobList = []
     for counter, linkedin_job in enumerate(linkedin_jobs):
         print("--------------------------------")
-        # print(f'Getting Job #{counter}/{len(linkedin_jobs)} for Subect {course_id} - {getCourse(course_id)[1]}')    # Tracker
+        print(f'Getting Job #{counter}/{len(linkedin_jobs)} for Subect {course_id} - {getCourse(course_id)[1]}')    # Tracker
         link = trimUrlAtRefid(linkedin_job['href'])
         jobList.append(getJobDetails(driver, link, course_id))
     return jobList

@@ -13,7 +13,7 @@ from datetime import date
 # Amount of jobs to fetch before getting details. Set to 0 to allow as many as possible.
 max_jobs = 100  # 0 = unlimited
 # Base link for Infojobs Internship search
-link_base = "https://www.infojobs.com.br/empregos.aspx?tipocontrato=4&palabra={term}"
+link_base = "https://www.infojobs.com.br/empregos.aspx?palabra={term}"
 
 # Gets job links from a search term
 
@@ -61,7 +61,7 @@ def getUrl_Infojobs(term):
         # General search & Order by Newest First
         str = urllib.parse.quote_plus("Estágio&campo=griddate&orden=desc")
     else:
-        # Search term is Course Name
+        term = getSearchTerm(term)
         str = urllib.parse.quote_plus(term)
     url = link_base.format(term=str)
     return url
@@ -128,7 +128,7 @@ def getJobsFromUrlList_Infojobs(driver, jobUrlList, course_id):
 def getJobsFromCourseID(driver, course_id):
     print(f'\nGetting Jobs from Course ID: {course_id}')
     if course_id == 1:
-        url = getUrl_Infojobs(None)
+        url = getUrl_Infojobs()
     else:
         courseName = getCourse(course_id)[1]
         url = getUrl_Infojobs(courseName)

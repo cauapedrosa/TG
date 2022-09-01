@@ -14,7 +14,8 @@ nltk.download('punkt')
 
 def getStopwords():
     stopwords = nltk.corpus.stopwords.words('portuguese')
-    stopwords.extend(['etc', 'estagio', 'requisitos', 'responsabilidades', 'estagiario', 'estagiaria'])
+    stopwords.extend(['etc', 'estagio', 'requisitos',
+                     'responsabilidades', 'estagiario', 'estagiaria'])
     stopwords.extend(nltk.corpus.stopwords.words('english'))
     return stopwords
 #
@@ -71,7 +72,7 @@ def treat_text(text):
     text = text.replace('(', ' ').replace(')', ' ').replace('/', ' ').replace("\\", ' ').replace('?', ' ').replace('-', ' ').replace('.', ' ').replace(':', ' ').replace('_', ' ').replace('+', ' ').replace(
         '=', ' ').replace('#', ' ').replace('$', ' ').replace('%', ' ').replace('&', ' ').replace('*', ' ').replace('!', ' ').replace('>', ' ').replace('<', ' ').replace('[', ' ').replace(']', ' ').replace('`', ' ').replace(':', ' ')
     text = text.replace("exibir menos", " ").replace("exibir", " ")
-    text = ' '.join( [w for w in text.split() if len(w)>1] )
+    text = ' '.join([w for w in text.split() if len(w) > 1])
     text = sub("\d+", " ", text).lower()
     words = word_tokenize(text)
     stopwords = getStopwords()
@@ -156,3 +157,13 @@ def getJobDate(text_date):
         delta = timedelta(days=30)
     job_date = (today - delta)
     return job_date
+
+
+def getSearchTerm(course_name):
+    search_term = course_name  # Default Case
+    if (course_name == 'Sistemas Biomédicos'):
+        search_term = 'biomed'
+    if (course_name == 'Manufatura Avançada'):
+        search_term = 'manufatura'
+    # print(f'DEBUG: getSearchTerm returning {search_term}')
+    return search_term

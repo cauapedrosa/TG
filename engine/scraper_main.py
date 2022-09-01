@@ -112,13 +112,13 @@ def main():
         elif flag == 3:
             print("You selected: Scrape Linkedin for Unclassified Jobs")
             try:
-                scrape_Linkedin(driver, course, 'vaga_geral')
-            except Exception as exception:
+                scrape_Linkedin(driver, 1, 'vaga_geral')
+            except Exception:
                 traceback.print_exc()
                 continue
             finally:
-                end = time.perf_counter()
-                print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
+                # end = time.perf_counter()
+                # print(f'\nFinished in {round(end - start, 2)} seconds\n\n')
                 flag = menu_main()
 
         # 4: Scrape Vagas for All Courses
@@ -204,7 +204,7 @@ def main():
                 traceback.print_exc()
                 continue
             finally:
-                flag = menu_main()
+                flag = 8
 
         # 9: Scrape InfoJobs for Unclassified Jobs
         elif flag == 9:
@@ -221,7 +221,7 @@ def scrape_Linkedin(driver, course_id, table_name):
     try:
         start = time.perf_counter()
         url = Linkedin.getUrlForCourse(course_id)
-        jobs = Linkedin.getJobsFromUrl_Linkedin(driver, url, course_id)
+        jobs = Linkedin.getJobsFromUrl(driver, url, course_id)
         print(f'\nFound {len(jobs)} jobs for Course ID {course_id} !')
         print(f'\nSaving jobs to database...')
         for counter, job in enumerate(jobs):

@@ -1,3 +1,4 @@
+from random import randrange
 from instance.config import config
 import psycopg2
 import pandas as pd
@@ -13,7 +14,7 @@ import pickle
 import time
 import traceback
 
-random_state = 14
+
 # save classifiers
 
 
@@ -49,10 +50,10 @@ def postgresql_to_dataframe(select_query, column_names):
 
 # main()
 
-def main():
+def main(random_state):
     # Loading Data
     data = postgresql_to_dataframe(
-        "SELECT c.curso_titulo, v.descr FROM vaga_formatada v INNER JOIN curso c ON c.curso_id = v.curso_id;", (r'curso_id', r'descr'))
+        "SELECT c.curso_titulo, v.descr FROM vaga_formatada v INNER JOIN curso c ON c.curso_id = v.curso_id WHERE v.curso_id NOT IN (10);", (r'curso_id', r'descr'))
 
     # Organizing Data
     categories = data['curso_id'].unique()
@@ -63,8 +64,8 @@ def main():
     # Splitting the data into training and testing sets
     train, test, train_labels, test_labels = train_test_split(
         descriptions, data['curso_id'], shuffle=True, random_state=random_state)
-    print(f'\n#### Train:\n{train}')
-    print(f'\n### Test:\n{test}')
+    # print(f'\n#### Train:\n{train}')
+    # print(f'\n### Test:\n{test}')
 
     # Defining base model
     print("\nDefining base model...")
@@ -81,19 +82,22 @@ def main():
     preds = model.predict(test)
     # # print(f'Scores: {scores}')
     # print(f'Scores mean: {scores.mean()}')
-    # # print(f'Scores var: {scores.var()}')
+    # print(f'Scores var: {scores.var()}')
     print('###############################################################################')
     print(
         f'🎯Classification Report:\n{classification_report(test_labels, preds, zero_division=0)}')
     print('###############################################################################')
     print(
-        f'\n🎯Accuracy Score: {accuracy_score(test_labels, preds)}\n@ Random State #{random_state}')
+        f'\nAccuracy Score:  🎯{accuracy_score(test_labels, preds)}\nFor random_state 🎲{random_state}\n')
+
     # Saving the model into a pickle file
-    saveclassifier(model)
+    # saveclassifier(model)
 
 
 if __name__ == '__main__':
     start = time.perf_counter()
-    main()
+    random_state = randrange(100)
+    # random_state = 87
+    main(random_state)
     print(
         f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

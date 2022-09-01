@@ -19,7 +19,8 @@ def getUrlFromCourseID(course_id):
         str = urllib.parse.quote_plus("Estagio")
         url = url_base.format(term=str)
     else:
-        str = urllib.parse.quote_plus("Estagio-" + course[1])
+        term = getSearchTerm(course[1])
+        str = urllib.parse.quote_plus(term)
         url = url_base.format(term=str)
     return url
 

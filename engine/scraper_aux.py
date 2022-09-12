@@ -14,8 +14,7 @@ nltk.download('punkt')
 
 def getStopwords():
     stopwords = nltk.corpus.stopwords.words('portuguese')
-    stopwords.extend(['etc', 'estagio', 'requisitos',
-                     'responsabilidades', 'estagiario', 'estagiaria'])
+    stopwords.extend([ 'estagio', 'estagiario', 'estagiaria', 'requisitos', 'etc', 'responsabilidades'])
     stopwords.extend(nltk.corpus.stopwords.words('english'))
     return stopwords
 #
@@ -165,5 +164,7 @@ def getSearchTerm(course_name):
         search_term = 'biomed'
     if (course_name == 'Manufatura Avançada'):
         search_term = 'manufatura'
+    if (course_name == 'Logística Aeroportuária'):
+        search_term = 'logistica'
     # print(f'DEBUG: getSearchTerm returning {search_term}')
     return search_term

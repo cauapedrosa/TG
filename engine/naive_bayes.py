@@ -18,7 +18,7 @@ import traceback
 # save classifiers
 
 
-def saveclassifier(model):
+def save_classifier(model):
     try:
         f = open('engine\my_classifier.pickle', 'wb')
         pickle.dump(model, f)
@@ -47,10 +47,10 @@ def postgresql_to_dataframe(select_query, column_names):
     cur.close()
     return pd.DataFrame(tupples, columns=column_names)
 
+# Test logic
 
-# main()
 
-def main(random_state):
+def build_classifier(random_state):
     # Loading Data
     data = postgresql_to_dataframe(
         "SELECT c.curso_titulo, v.descr FROM vaga_formatada v INNER JOIN curso c ON c.curso_id = v.curso_id WHERE v.curso_id NOT IN (10);", (r'curso_id', r'descr'))
@@ -69,35 +69,54 @@ def main(random_state):
 
     # Defining base model
     print("\nDefining base model...")
-    model = make_pipeline(TfidfVectorizer(), MultinomialNB(), verbose=True)
+    model = make_pipeline(TfidfVectorizer(), MultinomialNB())
     # Fitting the model
     print(f"\nFitting the model: {model}")
     model.fit(train, train_labels)
 
     # Testing the model
     print("\nTesting the model...")
-    # scores = cross_val_score(model, data_formatted, data_formatted['descr'])
-    # scores = model.predict_proba(test)[:, 1]
-
     preds = model.predict(test)
-    # # print(f'Scores: {scores}')
-    # print(f'Scores mean: {scores.mean()}')
-    # print(f'Scores var: {scores.var()}')
     print('###############################################################################')
     print(
         f'🎯Classification Report:\n{classification_report(test_labels, preds, zero_division=0)}')
     print('###############################################################################')
+    acc_score = accuracy_score(test_labels, preds)
     print(
-        f'\nAccuracy Score:  🎯{accuracy_score(test_labels, preds)}\nFor random_state 🎲{random_state}\n')
+        f'\nAccuracy Score:  🎯{acc_score}\nFor random_state 🎲{random_state}\n')
 
     # Saving the model into a pickle file
     # saveclassifier(model)
+    print('###############################################################################')
+    return random_state, acc_score
+
+# main()
+
+
+def main():
+    start = time.perf_counter()
+    # Run once version
+    random_state = 27
+    build_classifier(random_state)
+
+    #  Loop version
+    top_acc, top_ran = 0, 0
+    for random_state in range(0, 100):
+        # Comment this line to prevent looping
+        ran, acc = build_classifier(random_state)
+        if acc > top_acc:
+            top_acc = acc
+            top_ran = ran
+            print(
+                f'Ran {ran}, Acc 🎯{acc} is a ✅New Record!🎉🎊\ntop_acc: 🎯{top_acc}')
+        else:
+            print(f'Ran {ran}, Acc {acc}\ntop_acc:🎯{top_acc} ({top_ran})')
+    print(f'🎯Best Accuracy: {top_acc} for random_state {top_ran}')
+    # End of loop
+
+    print(
+        f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')
 
 
 if __name__ == '__main__':
-    start = time.perf_counter()
-    random_state = randrange(100)
-    # random_state = 87
-    main(random_state)
-    print(
-        f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')
+    main()

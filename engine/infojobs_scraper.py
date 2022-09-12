@@ -11,7 +11,7 @@ import traceback
 from datetime import date
 
 # Amount of jobs to fetch before getting details. Set to 0 to allow as many as possible.
-max_jobs = 100  # 0 = unlimited
+max_jobs = 500  # 0 = unlimited
 # Base link for Infojobs Internship search
 link_base = "https://www.infojobs.com.br/empregos.aspx?palabra={term}"
 
@@ -128,7 +128,7 @@ def getJobsFromUrlList_Infojobs(driver, jobUrlList, course_id):
 def getJobsFromCourseID(driver, course_id):
     print(f'\nGetting Jobs from Course ID: {course_id}')
     if course_id == 1:
-        url = getUrl_Infojobs()
+        url = getUrl_Infojobs(None)
     else:
         courseName = getCourse(course_id)[1]
         url = getUrl_Infojobs(courseName)

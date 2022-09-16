@@ -1,4 +1,3 @@
-import string
 from time import perf_counter
 import time
 import traceback
@@ -9,10 +8,8 @@ sys.path.append('C:/Users/xarys/Documents/GitHub/TG/engine')
 import scraper_aux as aux
 
 
-
-
 def update(url, descr):
-    command = "UPDATE vaga_geral SET descr = %s WHERE url = %s;"
+    command = "UPDATE vaga_formatada SET descr = %s WHERE url = %s;"
     conn = None
 
     try:
@@ -31,7 +28,7 @@ def update(url, descr):
 
 
 def get_jobs():
-    command = "SELECT url, descr FROM vaga_geral;"
+    command = "SELECT url, descr FROM vaga_formatada;"
     conn = None
     jobs = []
 
@@ -58,21 +55,18 @@ def get_jobs():
 
 
 def main():
-    start = time.perf_counter()
+    start = perf_counter()
     print(f'Using {len(aux.getStopwords())} Stopwords: {aux.getStopwords()}')
     jobs = get_jobs()
     print(f'Length of jobs: {len(jobs)}')
-    for i, job in enumerate(jobs):
+    for n, job in enumerate(jobs):
         url = job[0]
         descr = aux.treat_text(job[1])
-        print(f'\n⏳Updating job #{i+1}/{len(jobs)}:\n{descr}')
+        print(f'\n⏳Updating job #{n+1}/{len(jobs)}:\n{descr}')
         update(url, descr)
-    end = time.perf_counter()
+    end = perf_counter()
     print(f'\n⏱️ Finished in {round(end - start, 2)} seconds\n\n')
 
 
 if __name__ == '__main__':
-    start = time.perf_counter()
     main()
-    print(
-        f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

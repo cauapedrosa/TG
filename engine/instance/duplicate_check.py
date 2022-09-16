@@ -4,10 +4,10 @@ from config import config
 
 
 def clear_duplicates():
-    command = """SELECT curso_id, titulo, url FROM vaga_formatada
+    command = """SELECT ctid, url, curso_id, titulo, url FROM vaga_formatada
         WHERE ctid NOT IN (
         SELECT min(ctid) FROM vaga_formatada
-        GROUP  BY curso_id, titulo, descr
+        GROUP  BY url, titulo, curso_id, descr
         ORDER BY curso_id DESC);"""
 
     conn = None
@@ -35,5 +35,4 @@ def clear_duplicates():
 if __name__ == '__main__':
     start = time.perf_counter()
     clear_duplicates()
-    print(
-        f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')
+    print(f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

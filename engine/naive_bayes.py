@@ -1,23 +1,22 @@
-from random import randrange
+
+from collections import Counter
 from instance.config import config
 import psycopg2
 import pandas as pd
-from sklearn import datasets
+from imblearn.pipeline import make_pipeline
+from imblearn.under_sampling import NearMiss
+from sklearn import metrics
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.pipeline import make_pipeline
-from sklearn.model_selection import train_test_split, cross_validate, cross_val_score
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import make_classification
 from re import sub
 import pickle
 import time
 import traceback
 
 
-# save classifiers
-
-
+# Save Classifier to Pickle file
 def save_classifier(model):
     try:
         f = open('engine\my_classifier.pickle', 'wb')
@@ -43,75 +42,97 @@ def postgresql_to_dataframe(select_query, column_names):
         cur.close()
         return 1
 
-    tupples = cur.fetchall()
+    tuples = cur.fetchall()
     cur.close()
-    return pd.DataFrame(tupples, columns=column_names)
-
-# Test logic
+    return pd.DataFrame(tuples, columns=column_names)
 
 
-def build_classifier(random_state):
-    # Loading Data
-    data = postgresql_to_dataframe(
-        "SELECT c.curso_titulo, v.descr FROM vaga_formatada v INNER JOIN curso c ON c.curso_id = v.curso_id WHERE v.curso_id NOT IN (10);", (r'curso_id', r'descr'))
+# Build Classifier
+def build_classifier(data, random_state):
+    print('\n\n###############################################################################')
+    print("    _   __        _               ____                           \n   / | / /____ _ (_)_   __ ___   / __ ) ____ _ __  __ ___   _____\n  /  |/ // __ `// /| | / // _ \ / __  |/ __ `// / / // _ \ / ___/\n / /|  // /_/ // / | |/ //  __// /_/ // /_/ // /_/ //  __/(__  ) \n/_/ |_/ \__,_//_/  |___/ \___//_____/ \__,_/ \__, / \___//____/  \n                                            /____/")
+    print(f"Starting NB for 🎲{random_state}\n")
 
     # Organizing Data
-    categories = data['curso_id'].unique()
-    print(str(len(categories)) + " Categories Found")
+    categories = data['curso_id']
+    print(str(len(categories.unique())) + " Categories Found")
     descriptions = data['descr']
     print(str(len(descriptions)) + " Descriptions Found")
+    print(f"Original dataset class count:\n{Counter(categories)}\n")
+
+    # Applying TFIDF Feature Extraction
+    vectorizer = TfidfVectorizer()
+    X = vectorizer.fit_transform(descriptions)
+    print(f"Applied TFIDF.\nNew shape: {X.shape}")
+
+    # Balancing Classes
+    nm = NearMiss(sampling_strategy='not minority', version=2)
+    x_nm, y_nm = nm.fit_resample(X, categories)
+    print(f"Applied NearMiss. New class count:\n{Counter(y_nm)}\n")
 
     # Splitting the data into training and testing sets
-    train, test, train_labels, test_labels = train_test_split(
-        descriptions, data['curso_id'], shuffle=True, random_state=random_state)
-    # print(f'\n#### Train:\n{train}')
-    # print(f'\n### Test:\n{test}')
+    X_train, X_test, Y_train, Y_test = train_test_split(
+        x_nm, y_nm, shuffle=True, random_state=random_state)
+    print(
+        f"\nSplitting Data into Train and Test sets...\nX_train: {X_train.shape} | X_test: {X_test.shape}\nY_train: {Y_train.shape} | Y_test: {Y_test.shape}")
 
     # Defining base model
-    print("\nDefining base model...")
-    model = make_pipeline(TfidfVectorizer(), MultinomialNB())
+    print(f"Defining base model...")
+    model = MultinomialNB()
+
     # Fitting the model
-    print(f"\nFitting the model: {model}")
-    model.fit(train, train_labels)
+    print(f"Fitting the model...")
+    model.fit(X_train, Y_train)
 
     # Testing the model
-    print("\nTesting the model...")
-    preds = model.predict(test)
+    print("Testing the model...")
+    preds = model.predict(X_test)
+
     print('###############################################################################')
     print(
-        f'🎯Classification Report:\n{classification_report(test_labels, preds, zero_division=0)}')
+        f'🎯Classification Report:\n{metrics.classification_report(Y_test, preds, zero_division=0)}')
     print('###############################################################################')
-    acc_score = accuracy_score(test_labels, preds)
-    print(
-        f'\nAccuracy Score:  🎯{acc_score}\nFor random_state 🎲{random_state}\n')
+    # acc_score = accuracy_score(Y_test, preds)
+    # print(f'\nAccuracy Score:  🎯{acc_score}\nFor random_state 🎲{random_state}\n')
+
+    f1 = metrics.f1_score(Y_test, preds, average='weighted')
+    print(f'\nF1 Score:  🎯{f1}\nFor random_state 🎲{random_state}\n')
 
     # Saving the model into a pickle file
     # saveclassifier(model)
     print('###############################################################################')
-    return random_state, acc_score
+    return random_state, f1
+
 
 # main()
 
 
 def main():
     start = time.perf_counter()
+
+    # Loading Data
+    # data = postgresql_to_dataframe("SELECT v.curso_id, v.descr FROM vaga_formatada v WHERE v.curso_id NOT IN (16);", (r'curso_id', r'descr'))
+    data = postgresql_to_dataframe(
+        "SELECT v.curso_id, v.descr FROM vaga_formatada v;", (r'curso_id', r'descr'))
+
     # Run once version
-    random_state = 27
-    build_classifier(random_state)
+    random_state = 42
+    # build_classifier(data, random_state)
+    # return
 
     #  Loop version
-    top_acc, top_ran = 0, 0
-    for random_state in range(0, 100):
-        # Comment this line to prevent looping
-        ran, acc = build_classifier(random_state)
-        if acc > top_acc:
-            top_acc = acc
+    top_f1, top_ran = 0, 0
+    for random_state in range(100):
+        # Comment the next  line to prevent looping
+        ran, f1 = build_classifier(data, random_state)
+        if f1 > top_f1:
+            top_f1 = f1
             top_ran = ran
             print(
-                f'Ran {ran}, Acc 🎯{acc} is a ✅New Record!🎉🎊\ntop_acc: 🎯{top_acc}')
+                f'Ran {ran}, F1 🎯{f1} is a ✅New Record!🎊\ntop_F1: 🎯{top_f1}')
         else:
-            print(f'Ran {ran}, Acc {acc}\ntop_acc:🎯{top_acc} ({top_ran})')
-    print(f'🎯Best Accuracy: {top_acc} for random_state {top_ran}')
+            print(f'Ran {ran}, F1 {f1}\ntop_F1:🎯{top_f1} ({top_ran})')
+    print(f'\n🎯Best Accuracy: {top_f1} for 🎲random_state {top_ran}')
     # End of loop
 
     print(

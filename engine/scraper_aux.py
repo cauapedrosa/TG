@@ -14,7 +14,8 @@ nltk.download('punkt')
 
 def getStopwords():
     stopwords = nltk.corpus.stopwords.words('portuguese')
-    stopwords.extend([ 'estagio', 'estagiario', 'estagiaria', 'requisitos', 'etc', 'responsabilidades'])
+    stopwords.extend(['estagio', 'estagiario', 'estagiaria',
+                     'requisitos', 'etc', 'responsabilidades'])
     stopwords.extend(nltk.corpus.stopwords.words('english'))
     return stopwords
 #
@@ -68,18 +69,19 @@ def cleanup(txt):
 
 
 def treat_text(text):
-    text = text.replace('(', ' ').replace(')', ' ').replace('/', ' ').replace("\\", ' ').replace('?', ' ').replace('-', ' ').replace('.', ' ').replace(':', ' ').replace('_', ' ').replace('+', ' ').replace(
-        '=', ' ').replace('#', ' ').replace('$', ' ').replace('%', ' ').replace('&', ' ').replace('*', ' ').replace('!', ' ').replace('>', ' ').replace('<', ' ').replace('[', ' ').replace(']', ' ').replace('`', ' ').replace(':', ' ')
+    chars_to_remove = ['(', ')', '/', "\\", '?', '-', '.', ':', '_', '#', '$', '%', '&', '*', '!', '>', '<', '[', ']', '`', ':', '`']
+    for c in chars_to_remove:
+        text = text.replace(c, ' ')
     text = text.replace("exibir menos", " ").replace("exibir", " ")
     text = ' '.join([w for w in text.split() if len(w) > 1])
     text = sub("\d+", " ", text).lower()
-    words = word_tokenize(text)
+    words = word_tokenize(text, language='portuguese')
     stopwords = getStopwords()
-    wordsFiltered = []
+    words_treated = []
     for w in words:
         if w not in stopwords:
-            wordsFiltered.append(w)
-    return " ".join(wordsFiltered)
+            words_treated.append(w)
+    return " ".join(words_treated)
 
 
 def cleanupDescr_Linkedin(txt):

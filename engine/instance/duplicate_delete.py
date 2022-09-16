@@ -7,8 +7,8 @@ def clear_duplicates():
     command = """DELETE FROM vaga_formatada
         WHERE ctid NOT IN (
         SELECT min(ctid) FROM vaga_formatada
-        GROUP  BY titulo, descr
-        ORDER BY titulo) RETURNING curso_id, titulo;"""
+        GROUP  BY url, titulo, curso_id, descr
+        ORDER BY curso_id) RETURNING curso_id, titulo;"""
 
     conn = None
 

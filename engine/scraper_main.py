@@ -21,7 +21,8 @@ opt = webdriver.ChromeOptions()
 opt.binary_location = instance.driver.binary_location
 driver = webdriver.Chrome(service=ser, options=opt)
 # Print Stopwords
-print(f'\nStopwords: {getStopwords()}\n')
+# print(f'\nStopwords: {getStopwords()}\n')
+
 
 def saveJob(table, job):
     conn = None
@@ -50,21 +51,27 @@ def saveJob(table, job):
 
 
 def menu_main():
-    print("\n#############################################")
-    print("########  Starting scraper_main.py  #########")
-    print("#############################################")
-    print("####  Select an Option:             #########")
-    print("# 0: Exit                                   #")
-    print("# 1: Scrape Linkedin for All Courses        #")
-    print("# 2: Scrape Linkedin for Specific Course ID #")
-    print("# 3: Scrape Linkedin for Unclassified Jobs  #")
-    print("# 4: Scrape Vagas for All Courses           #")
-    print("# 5: Scrape Vagas for Specific Course ID    #")
-    print("# 6: Scrape Vagas for Unclassified Jobs     #")
-    print("# 7: Scrape InfoJobs for All Courses        #")
-    print("# 8: Scrape InfoJobs for Specific Course ID #")
-    print("# 9: Scrape InfoJobs for Unclassified Jobs  #")
-    print("#############################################")
+    print("\n\n#######################################################################")
+    print("#     _____                                 __  ___      _            #")
+    print("#    / ___/______________ _____  ___  _____/  |/  /___ _(_)___        #")
+    print("#    \__ \/ ___/ ___/ __ `/ __ \/ _ \/ ___/ /|_/ / __ `/ / __ \       #")
+    print("#   ___/ / /__/ /  / /_/ / /_/ /  __/ /  / /  / / /_/ / / / / /       #")
+    print("#  /____/\___/_/   \__,_/ .___/\___/_/  /_/  /_/\__,_/_/_/ /_/        #")
+    print("#                      /_/                                            #")
+    print("#######################################################################")
+    print("####  Select an Option:                                       #########")
+    print("## 0: Exit                                                           ##")
+    print("## 1: Scrape Linkedin for All Courses                                ##")
+    print("## 2: Scrape Linkedin for Specific Course ID                         ##")
+    print("## 3: Scrape Linkedin for Unclassified Jobs                          ##")
+    print("## 4: Scrape Vagas for All Courses                                   ##")
+    print("## 5: Scrape Vagas for Specific Course ID                            ##")
+    print("## 6: Scrape Vagas for Unclassified Jobs                             ##")
+    print("## 7: Scrape InfoJobs for All Courses                                ##")
+    print("## 8: Scrape InfoJobs for Specific Course ID                         ##")
+    print("## 9: Scrape InfoJobs for Unclassified Jobs                          ##")
+    print("## 10: Scrape All Platforms for Specific Course ID                   ##")
+    print("#######################################################################")
     print("Selecting: ", end=" ")
     try:
         flag = int(input())
@@ -216,6 +223,25 @@ def main():
             finally:
                 flag = menu_main()
 
+        elif flag ==10:
+            print("You selected: All Platforms for Specific Course ID ")
+            try:
+                print(f'Select the course you wish to Scrape from the list:')
+                printCourseList()
+                course = int(input())
+                while course not in range(2, len(getCourseList())):
+                    print(f'Input "{course}" is not a valid course, try again...')
+                    course = int(input())
+                scrape_Linkedin(driver, course, 'vaga_formatada')
+                scrape_Vagas(driver, course, 'vaga_formatada')
+                scrape_Infojobs(driver, course, 'vaga_formatada')
+            except Exception:
+                traceback.print_exc()
+                continue
+            finally:
+                flag = 10
+
+
 
 def scrape_Linkedin(driver, course_id, table_name):
     try:
@@ -276,4 +302,5 @@ def printCourseList():
 if __name__ == "__main__":
     start = time.perf_counter()
     main()
-    print(f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')
+    print(
+        f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')

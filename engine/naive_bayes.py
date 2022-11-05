@@ -1,15 +1,17 @@
 
 from collections import Counter
+from tabnanny import verbose
 from instance.config import config
 import psycopg2
 import pandas as pd
 from imblearn.pipeline import make_pipeline
 from imblearn.under_sampling import NearMiss
 from sklearn import metrics
+from sklearn.svm import SVC 
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
-from sklearn.datasets import make_classification
 from re import sub
 import pickle
 import time
@@ -49,33 +51,34 @@ def postgresql_to_dataframe(select_query, column_names):
 
 # Build Classifier
 def build_classifier(data, random_state):
-    print('\n\n###############################################################################')
-    print("    _   __        _               ____                           \n   / | / /____ _ (_)_   __ ___   / __ ) ____ _ __  __ ___   _____\n  /  |/ // __ `// /| | / // _ \ / __  |/ __ `// / / // _ \ / ___/\n / /|  // /_/ // / | |/ //  __// /_/ // /_/ // /_/ //  __/(__  ) \n/_/ |_/ \__,_//_/  |___/ \___//_____/ \__,_/ \__, / \___//____/  \n                                            /____/")
+    print('\n###############################################################################')
     print(f"Starting NB for 🎲{random_state}\n")
 
     # Organizing Data
-    categories = data['curso_id']
-    print(str(len(categories.unique())) + " Categories Found")
-    descriptions = data['descr']
-    print(str(len(descriptions)) + " Descriptions Found")
-    print(f"Original dataset class count:\n{Counter(categories)}\n")
+    X = data['descr']
+    print(str(len(X)) + " Descriptions Found")
+    Y = data['curso_id']
+    print(str(len(Y.unique())) + " Categories Found")
+    print(f"Original Dataset Class Count:\n>{Counter(Y)}\n")
 
     # Applying TFIDF Feature Extraction
-    vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(descriptions)
-    print(f"Applied TFIDF.\nNew shape: {X.shape}")
+    print("TFIDF Vectorizing... ")
+    vectorizer = TfidfVectorizer(max_df=0.8)
+    print(f"Prev X.shape: {X.shape}")
+    X = vectorizer.fit_transform(X)
+    print(f"New X.shape: {X.shape}")
 
-    # Balancing Classes
+    # Balancing Classes with NearMiss
     nm = NearMiss(sampling_strategy='not minority', version=2)
-    x_nm, y_nm = nm.fit_resample(X, categories)
-    print(f"Applied NearMiss. New class count:\n{Counter(y_nm)}\n")
+    X, Y = nm.fit_resample(X, Y)
+    print(f"NearMiss Resampled... New class count:\n>{Counter(Y)}\n")
 
+    
     # Splitting the data into training and testing sets
-    X_train, X_test, Y_train, Y_test = train_test_split(
-        x_nm, y_nm, shuffle=True, random_state=random_state)
-    print(
-        f"\nSplitting Data into Train and Test sets...\nX_train: {X_train.shape} | X_test: {X_test.shape}\nY_train: {Y_train.shape} | Y_test: {Y_test.shape}")
-
+    print(f"Splitting Data into Train and Test sets...")
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, shuffle=True, random_state=random_state)
+    print(f"X_train: {X_train.shape} | Y_train: {Y_train.shape}\nX_test: {X_test.shape} | Y_test: {Y_test.shape}")
+    
     # Defining base model
     print(f"Defining base model...")
     model = MultinomialNB()
@@ -87,20 +90,21 @@ def build_classifier(data, random_state):
     # Testing the model
     print("Testing the model...")
     preds = model.predict(X_test)
+    # preds_proba = model.predict_proba(X_test)
+    
+
 
     print('###############################################################################')
-    print(
-        f'🎯Classification Report:\n{metrics.classification_report(Y_test, preds, zero_division=0)}')
-    print('###############################################################################')
-    # acc_score = accuracy_score(Y_test, preds)
-    # print(f'\nAccuracy Score:  🎯{acc_score}\nFor random_state 🎲{random_state}\n')
+    # print(f'🎯Classification Report:\n{metrics.classification_report(Y_test, preds, zero_division=0)}\n###############################################################################')
 
     f1 = metrics.f1_score(Y_test, preds, average='weighted')
-    print(f'\nF1 Score:  🎯{f1}\nFor random_state 🎲{random_state}\n')
+    acc_score = metrics.accuracy_score(Y_test, preds)
+    acc_score_bal = metrics.balanced_accuracy_score(Y_test, preds)
+    print(f'\nTests for random_state 🎲{random_state} returned:')
+    print(f'NB: F1 {f1} | Acc {acc_score} | Balanced Acc {acc_score_bal}')
 
     # Saving the model into a pickle file
     # saveclassifier(model)
-    print('###############################################################################')
     return random_state, f1
 
 
@@ -109,34 +113,39 @@ def build_classifier(data, random_state):
 
 def main():
     start = time.perf_counter()
+    print('###############################################################################')
+    print("\n            _        \n|\ |_.o   _|_)_. _ _ \n| \(_||\/(/|_(_\(/_> \n               /     ")
 
     # Loading Data
+    print("Loading Data...")
     # data = postgresql_to_dataframe("SELECT v.curso_id, v.descr FROM vaga_formatada v WHERE v.curso_id NOT IN (16);", (r'curso_id', r'descr'))
-    data = postgresql_to_dataframe(
-        "SELECT v.curso_id, v.descr FROM vaga_formatada v;", (r'curso_id', r'descr'))
+    data = postgresql_to_dataframe("SELECT v.curso_id, v.descr FROM vaga_formatada v;", (r'curso_id', r'descr'))
+    print(f"Data Loaded. Shape: {data.shape}")
+
 
     # Run once version
-    random_state = 42
+    # random_state = 42
     # build_classifier(data, random_state)
     # return
 
     #  Loop version
+    run_X_times = 100
     top_f1, top_ran = 0, 0
-    for random_state in range(100):
+    for random_state in range(run_X_times):
         # Comment the next  line to prevent looping
         ran, f1 = build_classifier(data, random_state)
         if f1 > top_f1:
             top_f1 = f1
             top_ran = ran
-            print(
-                f'Ran {ran}, F1 🎯{f1} is a ✅New Record!🎊\ntop_F1: 🎯{top_f1}')
+            print(f'✅ F-score 🎯{f1} 🎲{ran} is a 🎊New Record!✅')
         else:
-            print(f'Ran {ran}, F1 {f1}\ntop_F1:🎯{top_f1} ({top_ran})')
-    print(f'\n🎯Best Accuracy: {top_f1} for 🎲random_state {top_ran}')
+            print(f'F1 🎯{f1} 🎲{ran} is not greater than 🎯{top_f1} 🎲{top_ran}')
     # End of loop
-
-    print(
-        f'\n🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds\n')
+    print('###############################################################################')
+    print("            _        \n|\ |_.o   _|_)_. _ _ \n| \(_||\/(/|_(_\(/_> \n               /     ")
+    print(f'\n🔥 Finished running NB {run_X_times} times...')
+    print(f'\n✅ Final Top Result:\nF-score of 🎯{top_f1} for random_state 🎲{top_ran}')
+    print(f'\n⌛ Total time elapsed: {round(time.perf_counter() - start, 2)} seconds, or {round((time.perf_counter() - start) / 60, 2)} minutes\n')
 
 
 if __name__ == '__main__':

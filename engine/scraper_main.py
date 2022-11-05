@@ -41,9 +41,9 @@ def saveJob(table, job):
         cur.close()
         print(f'✅Success! Saved into {table}: {job.title}')
     except psycopg2.DatabaseError as error:
-        print(f'⚠️ Error: {error}')
+        print(f'⚠️Job {job}\nRaised Error: {error}')
     except Exception as error:
-        print(f'⚠️ Error: {error}')
+        print(f'⚠️Job {job}\nRaised Error: {error}')
         traceback.print_exc()
     finally:
         if conn is not None:
@@ -229,7 +229,7 @@ def main():
                 print(f'Select the course you wish to Scrape from the list:')
                 printCourseList()
                 course = int(input())
-                while course not in range(2, len(getCourseList())):
+                while course not in range(1, len(getCourseList())+1):
                     print(f'Input "{course}" is not a valid course, try again...')
                     course = int(input())
                 scrape_Linkedin(driver, course, 'vaga_formatada')

@@ -1,18 +1,13 @@
 
 from collections import Counter
-from tabnanny import verbose
 from instance.config import config
 import psycopg2
 import pandas as pd
-from imblearn.pipeline import make_pipeline
 from imblearn.under_sampling import NearMiss
 from sklearn import metrics
-from sklearn.svm import SVC 
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
-from re import sub
 import pickle
 import time
 import traceback
@@ -24,9 +19,9 @@ def save_classifier(model):
         f = open('engine\my_classifier.pickle', 'wb')
         pickle.dump(model, f)
         f.close()
-        print('Salvo com sucesso')
+        print('✅ Salvo com sucesso')
     except:
-        print('⚠️Erro ao salvar o arquivo')
+        print('⚠️ Erro ao salvar o arquivo')
         traceback.print_exc()
 
 # Transform a SELECT query into a pandas dataframe
@@ -104,7 +99,7 @@ def build_classifier(data, random_state):
     print(f'NB: F1 {f1} | Acc {acc_score} | Balanced Acc {acc_score_bal}')
 
     # Saving the model into a pickle file
-    # saveclassifier(model)
+    save_classifier(model)
     return random_state, f1
 
 
@@ -124,9 +119,9 @@ def main():
 
 
     # Run once version
-    # random_state = 42
-    # build_classifier(data, random_state)
-    # return
+    random_state = 1630
+    build_classifier(data, random_state)
+    return
 
     #  Loop version
     run_X_times = 100

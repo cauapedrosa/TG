@@ -1,9 +1,13 @@
-# Ignore all backup classifier.pickle (s)
-**/my_classifier.?.pickle
+# Ignore all backup .pickle (s)
+*.*.pickle
 
 # Ignore .ini and .yaml files
 **.ini
 **.yaml
+
+# Ignore database-related local files (.csv & .sql)
+*.csv
+*.sql
 
 # Ignore __pycache__ directories
 **/__pycache__

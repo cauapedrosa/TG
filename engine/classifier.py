@@ -78,18 +78,16 @@ def main():
     f.close()
     print(f'✅ Loaded classifier: {classifier} with {len(classifier.classes_)} classes')
 
-    # print(f'\n>Type of data_geral: {type(data_geral)}')
-    # print(f'\n>Shape of data_geral: {data_geral.shape}')
-    # print(f'\n>Description of data_geral:\n{data_geral.describe()}\n>data_geral:\n{data_geral}')
+    # Apply TF-IDF to loaded descriptions
     descrs_tfidf = vectorizer.transform(data_geral['descr'])
 
+    # Perform prediction for all jobs in array
     previsoes = classifier.predict(descrs_tfidf)
-    # print(f'>data_geral:\n{data_geral}')
-    # print(f'>descrs_tfidf:\n{descrs_tfidf}')
-    # print(f'>prevs:\n{previsoes}')
 
+    # Store predictions into Data Frame
     data_geral['curso_id'] = previsoes
 
+    # Update Database 
     for index, row in data_geral.iterrows():
         id = row['curso_id']
         url = row['url']

@@ -66,50 +66,39 @@ def build_classifier(data, random_state):
     print(str(len(X)) + " Descriptions Found")
     Y = data['curso_id']
     print(str(len(Y.unique())) + " Categories Found")
-    # print(f"Original Dataset Class Count:\n>{Counter(Y)}\n")
-    # print(f'Type of X:{type(X)} Y:{type(Y)}')
-    
 
     # Applying TFIDF Feature Extraction
     print("# TFIDF Vectorizing... ")
-    # print(f"Prev X.shape: {X.shape}")
     vectorizer = TfidfVectorizer(max_df=0.8)
     X = vectorizer.fit_transform(X)
-    # print(f"New X.shape: {X.shape}")
 
     # Balancing Classes with NearMiss
     print("# NearMiss Balancing... ")
     nm = NearMiss(sampling_strategy='not minority', version=2)
     X, Y = nm.fit_resample(X, Y)
-    # X, Y = nm.fit_resample(vectorizer.fit(X), Y)
     print(f"NearMiss Resampled... New class count:\n>{Counter(Y)}\n")
     
     # Splitting the data into training and testing sets
     print(f"# Splitting Data into Train and Test sets...")
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, shuffle=True, random_state=random_state)
-    # print(f"X_train: {X_train.shape} | Y_train: {Y_train.shape}\nX_test: {X_test.shape} | Y_test: {Y_test.shape}")
     
     # Defining base model
     print(f"# Defining base model...")
     model =  make_pipeline  (
-            # vectorizer,
             MultinomialNB()
         )
 
     # Fitting the model
     print(f"# Fitting the model...")
-    # print(f'X_train:{X_train}\nY_train:{Y_train}')
     model.fit(X_train, Y_train)
     print(f'Model: {model}')
 
     # Testing the model
     print("# Testing the model...")
     preds = model.predict(X_test)
-    # preds_proba = model.predict_proba(X_test)
 
 
     print('###############################################################################')
-    # print(f'🎯Classification Report:\n{metrics.classification_report(Y_test, preds, zero_division=0)}\n###############################################################################')
 
     f1 = metrics.f1_score(Y_test, preds, average='weighted')
     acc_score = metrics.accuracy_score(Y_test, preds)
@@ -133,7 +122,6 @@ def main():
 
     # Loading Data
     print("Loading Data...")
-    # data = postgresql_to_dataframe("SELECT v.curso_id, v.descr FROM vaga_formatada v WHERE v.curso_id NOT IN (16);", (r'curso_id', r'descr'))
     data = postgresql_to_dataframe("SELECT v.curso_id, v.descr FROM vaga_formatada v;", (r'curso_id', r'descr'))
     print(f"Data Loaded. Shape: {data.shape}")
 

@@ -19,9 +19,10 @@ def check():
                 f'\n>Executing Command #{counter+1}/{len(commands)}:\n{command.strip()}:')
             cur.execute(command)
             print(f'Status: {cur.statusmessage}')
-            # aux = cur.fetchall()
-            # for row in aux:
-            #     print(row)
+            aux = cur.fetchall()
+            print(f'Result: {len(aux)}')
+            for row in aux:
+                print(f'> {row}')
         cur.close()
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:

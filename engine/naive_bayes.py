@@ -8,6 +8,7 @@ from sklearn import metrics
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
 import pickle
 import time
 import traceback
@@ -16,8 +17,19 @@ import traceback
 # Save Classifier to Pickle file
 def save_classifier(model):
     try:
-        f = open('engine\my_classifier.pickle', 'wb')
+        f = open('engine/my_classifier.pickle', 'wb')
         pickle.dump(model, f)
+        f.close()
+        print('✅ Salvo com sucesso')
+    except:
+        print('⚠️ Erro ao salvar o arquivo')
+        traceback.print_exc()
+
+# Save vectorizer to Pickle file
+def save_vectorizer(vectorizer):
+    try:
+        f = open('engine/vectorizer.pickle', 'wb')
+        pickle.dump(vectorizer, f)
         f.close()
         print('✅ Salvo com sucesso')
     except:
@@ -47,46 +59,53 @@ def postgresql_to_dataframe(select_query, column_names):
 # Build Classifier
 def build_classifier(data, random_state):
     print('\n###############################################################################')
-    print(f"Starting NB for 🎲{random_state}\n")
+    print(f"# Starting NB for 🎲{random_state}\n")
 
     # Organizing Data
     X = data['descr']
     print(str(len(X)) + " Descriptions Found")
     Y = data['curso_id']
     print(str(len(Y.unique())) + " Categories Found")
-    print(f"Original Dataset Class Count:\n>{Counter(Y)}\n")
+    # print(f"Original Dataset Class Count:\n>{Counter(Y)}\n")
+    # print(f'Type of X:{type(X)} Y:{type(Y)}')
+    
 
     # Applying TFIDF Feature Extraction
-    print("TFIDF Vectorizing... ")
+    print("# TFIDF Vectorizing... ")
+    # print(f"Prev X.shape: {X.shape}")
     vectorizer = TfidfVectorizer(max_df=0.8)
-    print(f"Prev X.shape: {X.shape}")
     X = vectorizer.fit_transform(X)
-    print(f"New X.shape: {X.shape}")
+    # print(f"New X.shape: {X.shape}")
 
     # Balancing Classes with NearMiss
+    print("# NearMiss Balancing... ")
     nm = NearMiss(sampling_strategy='not minority', version=2)
     X, Y = nm.fit_resample(X, Y)
+    # X, Y = nm.fit_resample(vectorizer.fit(X), Y)
     print(f"NearMiss Resampled... New class count:\n>{Counter(Y)}\n")
-
     
     # Splitting the data into training and testing sets
-    print(f"Splitting Data into Train and Test sets...")
+    print(f"# Splitting Data into Train and Test sets...")
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, shuffle=True, random_state=random_state)
-    print(f"X_train: {X_train.shape} | Y_train: {Y_train.shape}\nX_test: {X_test.shape} | Y_test: {Y_test.shape}")
+    # print(f"X_train: {X_train.shape} | Y_train: {Y_train.shape}\nX_test: {X_test.shape} | Y_test: {Y_test.shape}")
     
     # Defining base model
-    print(f"Defining base model...")
-    model = MultinomialNB()
+    print(f"# Defining base model...")
+    model =  make_pipeline  (
+            # vectorizer,
+            MultinomialNB()
+        )
 
     # Fitting the model
-    print(f"Fitting the model...")
+    print(f"# Fitting the model...")
+    # print(f'X_train:{X_train}\nY_train:{Y_train}')
     model.fit(X_train, Y_train)
+    print(f'Model: {model}')
 
     # Testing the model
-    print("Testing the model...")
+    print("# Testing the model...")
     preds = model.predict(X_test)
     # preds_proba = model.predict_proba(X_test)
-    
 
 
     print('###############################################################################')
@@ -99,7 +118,8 @@ def build_classifier(data, random_state):
     print(f'NB: F1 {f1} | Acc {acc_score} | Balanced Acc {acc_score_bal}')
 
     # Saving the model into a pickle file
-    save_classifier(model)
+    # save_classifier(model)
+    # save_vectorizer(vectorizer)
     return random_state, f1
 
 
@@ -119,12 +139,12 @@ def main():
 
 
     # Run once version
-    random_state = 1630
-    build_classifier(data, random_state)
-    return
+    # random_state = 46
+    # build_classifier(data, random_state)
+    # return
 
     #  Loop version
-    run_X_times = 100
+    run_X_times = 10000
     top_f1, top_ran = 0, 0
     for random_state in range(run_X_times):
         # Comment the next  line to prevent looping

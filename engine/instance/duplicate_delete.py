@@ -19,9 +19,9 @@ def clear_duplicates():
         print(f'##################\n>Executing Command:\n{command.strip()}\n')
         cur.execute(command)
         output = cur.fetchall()
+        print(f'-> Result description: {cur.description}')
         for row in output:
             print(row)
-        print(f'-> Result description: {cur.description}')
         print(f'-> Affected rows: {cur.rowcount}')
         cur.close()
         conn.commit()

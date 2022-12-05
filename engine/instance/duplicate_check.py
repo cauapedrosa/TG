@@ -4,10 +4,10 @@ from config import config
 
 
 def clear_duplicates():
-    command = """SELECT ctid, url, curso_id, titulo, url FROM vaga_formatada
+    command = """SELECT ctid, curso_id, titulo FROM vaga_geral
         WHERE ctid NOT IN (
-        SELECT min(ctid) FROM vaga_formatada
-        GROUP  BY url, titulo, curso_id, descr
+        SELECT min(ctid) FROM vaga_geral
+        GROUP  BY titulo, curso_id, descr
         ORDER BY curso_id DESC);"""
 
     conn = None

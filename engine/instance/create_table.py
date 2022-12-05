@@ -27,7 +27,7 @@ def create_tables():
     )
     """, """
     CREATE TABLE vaga_geral (
-        URL varchar NOT NULL PRIMARY KEY,
+        URL varchar PRIMARY KEY ,
         curso_id int NOT NULL,
         titulo varchar NOT NULL,
         descr varchar NOT NULL,

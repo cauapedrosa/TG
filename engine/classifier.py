@@ -1,3 +1,5 @@
+# from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
 import time
 from instance.config import config
 from naive_bayes import postgresql_to_dataframe
@@ -29,6 +31,7 @@ def de_para_previsao(previsao):
 
 
 def table_update(url, previsao):
+    status = 0
     conn = None
     try:
         params = config()
@@ -36,41 +39,68 @@ def table_update(url, previsao):
         cur = conn.cursor()
         cur.execute(
             """UPDATE vaga_geral SET curso_id = %s WHERE url = %s""", (previsao, url))
-        print(f'>{cur.rowcount} rows updated')
+        # print(f'>{cur.rowcount} rows updated')
+        if cur.rowcount > 0:
+            status = 1
         conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(f'ERROR: {error}')
-        # cur.close()
+        print(f'⚠️ ERROR: {error}')
+        return status
     finally:
         if conn is not None:
             conn.close()
+            print(f'✅table_update Successful! {status} row(s) affected.')
+        return status
 
 
 def main():
-    # load data
+    n_updated_jobs = 0 # Tracker for number of updated jobs
+
+    # Load jobs from Database into a Pandas.Dataframe
     data_geral = postgresql_to_dataframe(
         "SELECT url, descr FROM vaga_geral WHERE curso_id = 1;", (r'url', r'descr'))
+    print(f'######################################\n{len(data_geral)} jobs loaded with shape {data_geral.shape}')
 
-    print(f'{data_geral} vagas carregadas')
+    if len(data_geral) < 1:
+        print('❌ No jobs to classify')
+        return 0
 
-    # Open pickle file
-    f = open('engine\my_classifier.pickle', 'rb')
+    # Load TF-IDF Vectorizer from pickle file
+    f = open('engine/vectorizer.pickle', 'rb')
+    vectorizer = pickle.load(f)
+    f.close()
+    print(f'✅ Loaded vectorizer: {vectorizer} with a vocabulary of {len(vectorizer.vocabulary_)} words')
+
+    # Load Multinomial Naive Bayes classifier from pickle file
+    f = open('engine/my_classifier.pickle', 'rb')
     classifier = pickle.load(f)
     f.close()
-    print(f'Loaded classifier: {classifier}')
+    print(f'✅ Loaded classifier: {classifier} with {len(classifier.classes_)} classes')
+
+    # print(f'\n>Type of data_geral: {type(data_geral)}')
+    # print(f'\n>Shape of data_geral: {data_geral.shape}')
+    # print(f'\n>Description of data_geral:\n{data_geral.describe()}\n>data_geral:\n{data_geral}')
+    descrs_tfidf = vectorizer.transform(data_geral['descr'])
+
+    previsoes = classifier.predict(descrs_tfidf)
+    # print(f'>data_geral:\n{data_geral}')
+    # print(f'>descrs_tfidf:\n{descrs_tfidf}')
+    # print(f'>prevs:\n{previsoes}')
+
+    data_geral['curso_id'] = previsoes
+
     for index, row in data_geral.iterrows():
-        text = row['descr']
-        previsao = classifier.predict([text])
-        previsao = str(previsao).replace(
-            "'", "").replace("[", "").replace("]", "")
-        table_update(row['url'], de_para_previsao(previsao))
-        print(
-            f'\n⏱️ #{index+1}/{len(data_geral)} | Predicting >{previsao.upper()}< for:\n{text}')
+        id = row['curso_id']
+        url = row['url']
+        print(f'\n⏱️ #{index+1}/{len(data_geral)} | Predicting >{id}< for:\n{url}')
+        n_updated_jobs += table_update(row['url'], row['curso_id'])
+        print(f'\n⚙️ #{n_updated_jobs}/{len(data_geral)} jobs updated...')
+
+    return n_updated_jobs
 
 
 if __name__ == '__main__':
     start = time.perf_counter()
-    main()
-    print(
-        f'🔥 Total time elapsed: {round(time.perf_counter() - start, 2)} seconds')
+    n=main()
+    print(f'🔥 Classified {n} jobs in {round(time.perf_counter() - start, 2)} seconds')

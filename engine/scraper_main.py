@@ -223,18 +223,26 @@ def main():
             finally:
                 flag = menu_main()
 
+        # 10: Scrape All Platforms for Specific Course ID
         elif flag ==10:
             print("You selected: All Platforms for Specific Course ID ")
             try:
                 print(f'Select the course you wish to Scrape from the list:')
                 printCourseList()
                 course = int(input())
+
                 while course not in range(1, len(getCourseList())+1):
-                    print(f'Input "{course}" is not a valid course, try again...')
+                    print(f'Input "{course}" is not a valid course, try a number between 1 and {len(getCourseList())}...')
                     course = int(input())
-                scrape_Linkedin(driver, course, 'vaga_formatada')
-                scrape_Vagas(driver, course, 'vaga_formatada')
-                scrape_Infojobs(driver, course, 'vaga_formatada')
+
+                if course == 1:
+                    table = 'vaga_geral'
+                else:
+                    table = 'vaga_formatada'
+                print(f'Course ID: {course}, Table: {table}')
+                scrape_Linkedin(driver, course, table)
+                scrape_Vagas(driver, course, table)
+                scrape_Infojobs(driver, course, table)
             except Exception:
                 traceback.print_exc()
                 continue

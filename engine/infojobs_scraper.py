@@ -3,7 +3,7 @@ from Job import Job
 from scraper_aux import *
 # Externals
 from instance.config import config
-from selenium import webdriver
+from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 from time import sleep
 import urllib.parse
@@ -11,7 +11,7 @@ import traceback
 from datetime import date
 
 # Amount of jobs to fetch before getting details. Set to 0 to allow as many as possible.
-max_jobs = 500  # 0 = unlimited
+max_jobs = 100  # 0 = unlimited
 # Base link for Infojobs Internship search
 link_base = "https://www.infojobs.com.br/empregos.aspx?palabra={term}"
 
@@ -152,7 +152,7 @@ def getJobsFromCourseID(driver, course_id):
             if soup.select("button#didomi-notice-agree-button"):
                 print("\n--> Agreeing to didomi notice")
                 # click it
-                driver.find_element_by_id("didomi-notice-agree-button").click()
+                driver.find_element(By.ID, "didomi-notice-agree-button").click()
                 sleep(1)
         except Exception:
             traceback.print_exc()
